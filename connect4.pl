@@ -9,8 +9,6 @@ playAI :- tutorial, getBlankBoard(Board), nextPlayAI(Board, 1).
 nextPlayAI(Board, 1) :- nl,write('It is your turn.'),nl,nl,
 					  getAI3Move(Board, Move),
 					  nl,write('Yellow dropped piece into column '),write(Move),nl,nl,
-
-
 					  getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
 					  drawBoard(NewBoard),
 
