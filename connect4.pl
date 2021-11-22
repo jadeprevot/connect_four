@@ -4,7 +4,7 @@
 % Enter 'playAI1.' to play the game versus the level 1 computer.
 
 % play the game vs level 1 AI ----------------------------------------------------------------------------
-playAI :- tutorial, getBlankBoard(Board), nextPlayAI(Board, 1).
+playAI :- getBlankBoard(Board), nextPlayAI(Board, 1).
 
 nextPlayAI(Board, 1) :- nl,write('It is your turn.'),nl,nl,
 					  getAI3Move(Board, Move),
@@ -32,7 +32,7 @@ nextStateAI(Board, NewPlayer,_) :- nextPlayAI(Board, NewPlayer).
 getAI1Move(_, Move) :- random_between(1,7, Move).
 
 % play the game vs level 2 AI ----------------------------------------------------------------------------
-playAI2 :- tutorial, getBlankBoard(Board), nextPlayAI2(Board, 1).
+playAI2 :- getBlankBoard(Board), nextPlayAI2(Board, 1).
 
 nextPlayAI2(Board, 1) :- nl,write('It is your turn.'),nl,nl,
 					  drawBoard(Board),
@@ -61,7 +61,7 @@ getAI2Move(Board, 6) :- \+ isIllegal(Board, 6).
 getAI2Move(Board, 7) :- \+ isIllegal(Board, 7).
 
 % play the game vs level 3 AI ----------------------------------------------------------------------------
-playAI3 :- tutorial, getBlankBoard(Board), nextPlayAI3(Board, 1).
+playAI3 :-  getBlankBoard(Board), nextPlayAI3(Board, 1).
 
 nextPlayAI3(Board, 1) :- nl,write('It is your turn.'),nl,nl,
 					  drawBoard(Board),
@@ -101,31 +101,9 @@ getAI3Move(_, Move) :- random_between(1,7, Move).
 % true if Player dropping piece at DropCol would win
 wouldWin(Board, DropCol, Player) :- dropToken(Board, Player, DropCol, NewBoard), getDropXY(Board, DropCol, OutDropXY), win(NewBoard, Player, OutDropXY).
 
-% play the game in 2 player mode ------------------------------------------------------------------------
-play :- tutorial, getBlankBoard(Board), nextPlay(Board, 1).
-
-nextPlay(Board, 1) :- %whosturn(1),
-			    drawBoard(Board),
-			    get(connect4(1), prompt, X),
-			    atom_number(X, Move),
-			    getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
-					  nextState(NewBoard, NewPlayer, OutDropXY).
-
-nextPlay(Board, 2) :- %whosturn(2),
-			    drawBoard(Board),
-			    get(connect4(2), prompt, X),
-			    atom_number(X, Move),
-					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
-					  nextState(NewBoard, NewPlayer, OutDropXY).
-
 getNextState(InitBoard, InitPlayer, DropCol, InitBoard, InitPlayer,(1,1)) :- isIllegal(InitBoard, DropCol),nl, write('Illegal move.'),nl.
 getNextState(InitBoard, 1, DropCol, NewBoard, NewPlayer, OutDropXY) :- dropToken(InitBoard, 1, DropCol, NewBoard), getDropXY(InitBoard, DropCol, OutDropXY), NewPlayer = 2.
 getNextState(InitBoard, 2, DropCol, NewBoard, NewPlayer, OutDropXY) :- dropToken(InitBoard, 2, DropCol, NewBoard), getDropXY(InitBoard, DropCol, OutDropXY), NewPlayer = 1.
-
-nextState(Board, 2, DropXY) :- win(Board, 1, DropXY),nl, write('Player '),write(1),write(' wins!'),nl, endmessage.
-nextState(Board, 1, DropXY) :- win(Board, 2, DropXY),nl, write('Player '),write(2),write(' wins!'),nl, endmessage.
-nextState(Board,_,_) :- isFull(Board),nl, write('It\'s a tie!'),nl, endmessage.
-nextState(Board, NewPlayer,_) :- nextPlay(Board, NewPlayer).
 
 win(Board, Player, Move) :- getRow(Board, Move, OutRow), fourInARow(OutRow, Player, 0).
 win(Board, Player, Move) :- getCol(Board, Move, OutCol), fourInARow(OutCol, Player, 0).
@@ -136,12 +114,6 @@ win(Board, Player, Move) :- getDiagUp(Board, Move, OutDiag), fourInARow(OutDiag,
 isIllegal(_, DropCol) :- DropCol > 7.
 isIllegal(_, DropCol) :- DropCol < 1.
 isIllegal(Board, DropCol) :- getElem(Board, DropCol, 1, 1, 1, OutElem), dif(OutElem, 0).
-
-% say whos turn it is
-whosturn(Player) :- nl,nl,write('It is player '), write(Player), write('\'s turn.'),nl,nl.
-
-%print the tutorial
-tutorial :- write('Play by entering an integer position of the column to drop your piece into.'),nl,nl.
 
 % take a board, a player, and a column and return the board with the player's token dropped at the column
 
@@ -292,3 +264,15 @@ prompt(W, Value:name) :<-
 :- pce_end_class.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+
+
+
+
+
