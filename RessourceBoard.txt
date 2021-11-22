@@ -1,0 +1,17 @@
+[[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,1,0,0],[0,0,0,2,2,2,0],[0,0,0,1,2,1,0],[0,1,2,2,1,1,2]]
+
+
+[[0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0],
+ [0,0,0,0,1,0,0],
+ [0,0,0,2,2,2,0],
+ [0,0,0,1,2,1,0],
+ [0,1,2,2,1,1,2]]
+
+countRow(Row,PosX,CurrentX,Score,Player)
+
+countLineScore(L,PosX,Score,Player):-length(L,Taille),countLineScore(L,PosX,1,Score,Player,Taille).
+countLineScore(_,_,CurrentX,0,_,Taille):-CurrentX is Taille+1.
+countLineScore(_,PosX,CurrentX,0,_,_):- CurrentX is PosX+4.
+countLineScore([F|R],PosX,CurrentX,Score,Player,Taille):- PosX-CurrentX<4, F==Player, is(NextX, CurrentX+1), countLineScore(R,PosX,NextX,NextScore,Player,Taille), is(Score, NextScore+1).
+countLineScore([_|R],PosX,CurrentX,Score,Player,Taille):- is(NextX, CurrentX+1),countLineScore(R,PosX,NextX,Score,Player,Taille).

@@ -261,6 +261,19 @@ endmessage :- write('Enter \'play.\' to play a 2 player game or \'playAI[1-3].\'
 
 %testGetElem(Out) :- getBlankBoard(Board), getElem(Board, 2, 4, 1, 1, Out).
 
+%Return the Score when player plays in the col
+calcScore(Board,col,player,score):-getDropXY(Board,col,(X,Y)),calcScore(Board,X,Y,player,score).
+calcScore(_,x,y,player,score).
+
+countLineScore(L,PosX,Score,Player):-length(L,Taille),countLineScore(L,PosX,1,Score,Player,Taille).
+countLineScore(_,_,CurrentX,0,_,Taille):-CurrentX is Taille+1.
+countLineScore(_,PosX,CurrentX,0,_,_):- CurrentX is PosX+4.
+countLineScore([F|R],PosX,CurrentX,Score,Player,Taille):- PosX-CurrentX<4, F==Player, is(NextX, CurrentX+1), countLineScore(R,PosX,NextX,NextScore,Player,Taille),Score is NextScore+1.
+countLineScore([_|R],PosX,CurrentX,Score,Player,Taille):-is(NextX, CurrentX+1),countLineScore(R,PosX,NextX,Score,Player,Taille).
+
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% GUI
 
