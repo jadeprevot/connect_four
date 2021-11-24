@@ -235,6 +235,16 @@ endmessage :- write('Enter \'play.\' to play a 2 player game or \'playAI[1-3].\'
 
 % ----------------------------------------------------------------------------
 % Code par H4114
+%
+inversionPlayer(1,2).
+inversionPlayer(2,1).
+
+heuristic1(Board,Col,Player,50001):- \+ isIllegal(Board,Col),wouldWin(Board, Col, Player).
+heuristic1(Board,Col,Player,50000):- \+ isIllegal(Board,Col),inversionPlayer(Player,NotPlayer),wouldWin(Board, Col, NotPlayer).
+heuristic1(Board,Col,Player,Score):- \+ isIllegal(Board,Col),calcScore(Board,Col,Player,Score).
+heuristic1(_,_,_,-50003).
+
+%
 % Return the Score when player plays in the col
 calcScore(Board,Col,Player,Score):-getDropXY(Board,Col,(X,Y)),calcScore(Board,X,Y,Player,Score).
 calcScore(Board,X,Y,Player,Score):-getRow(Board,(X,Y),Row),countLineScore(Row,X,Score1,Player),
@@ -261,6 +271,29 @@ countLineScore(_,_,CurrentX,0,_,Taille):-CurrentX is Taille+1.
 countLineScore(_,PosX,CurrentX,0,_,_):- CurrentX is PosX+4.
 countLineScore([F|R],PosX,CurrentX,Score,Player,Taille):- PosX-CurrentX<4, F==Player, is(NextX, CurrentX+1), countLineScore(R,PosX,NextX,NextScore,Player,Taille),Score is NextScore+1.
 countLineScore([_|R],PosX,CurrentX,Score,Player,Taille):-is(NextX, CurrentX+1),countLineScore(R,PosX,NextX,Score,Player,Taille).
+
+% Weighted board
+weight([[3,4,5,7,5,4,3],[4,6,8,10,8,6,4],[5,8,11,13,11,8,5],[5,8,11,13,11,8,5],[4,6,8,10,8,6,4],[3,4,5,7,5,4,3]]).
+
+
+heuristic2(Board,Col,Player,50001):- \+ isIllegal(Board,Col),wouldWin(Board, Col, Player).
+heuristic2(Board,Col,Player,50000):- \+ isIllegal(Board,Col),inversionPlayer(Player,NotPlayer),wouldWin(Board, Col, NotPlayer).
+heuristic2(Board,Col,Player,Score):- \+ isIllegal(Board,Col),dropToken(Board,Player,Col,NewBoard),boardScoreWeights(NewBoard,1,1,Score,Player).
+heuristic2(_,_,_,-50003).
+
+
+% Pour chaque position, si le jeton apartient a Player, on ajoute le
+% poids de la case au score
+% Si le jeton appartient a l'adversaire, on soustrait ce poids
+boardScoreWeights([],_,_,0,_).
+boardScoreWeights([[]|T],_,Y,Score,Player):- NewY is Y+1, boardScoreWeights(T,1,NewY,Score,Player).
+boardScoreWeights([[Player|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,NewScore,Player),
+                                                    weight(W),getElem(W,X,Y,1,1,Out),Score is NewScore+Out.
+boardScoreWeights([[0|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,Score,Player).
+boardScoreWeights([[_|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,NewScore,Player),
+                                                    weight(W),getElem(W,X,Y,1,1,Out),Score is NewScore-Out.
+
+
 
 
 
