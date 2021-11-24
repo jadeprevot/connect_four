@@ -290,7 +290,25 @@ countLineScore(_,PosX,CurrentX,0,_,_):- CurrentX is PosX+4.
 countLineScore([F|R],PosX,CurrentX,Score,Player,Taille):- PosX-CurrentX<4, F==Player, is(NextX, CurrentX+1), countLineScore(R,PosX,NextX,NextScore,Player,Taille),Score is NextScore+1.
 countLineScore([_|R],PosX,CurrentX,Score,Player,Taille):-is(NextX, CurrentX+1),countLineScore(R,PosX,NextX,Score,Player,Taille).
 
+%%% Annie's test
+% The max value of sets of 4 a piece can be in
+getMaxList(X) :- X = [[3,4,5,7,5,4,3],
+				[4,6,8,10,8,6,4],
+				[5,8,11,13,11,8,5],
+				[5,8,11,13,11,8,5],
+				[4,6,8,13,8,6,4],
+				[3,4,5,7,5,4,3]].
 
+			
+				
+% get value of a matrix	
+cellVal([], _, []).
+cellVal([[R, C]| L], X, [Y|Z]) :-
+    nth0(R, X, Row),
+    nth0(C, Row, Y),
+    cellVal(L, X, Z).
+
+%%%
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
