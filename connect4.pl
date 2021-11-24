@@ -262,8 +262,8 @@ endmessage :- write('Enter \'play.\' to play a 2 player game or \'playAI[1-3].\'
 %testGetElem(Out) :- getBlankBoard(Board), getElem(Board, 2, 4, 1, 1, Out).
 
 %Return the Score when player plays in the col
-calcScore(Board,col,player,score):-getDropXY(Board,col,(X,Y)),calcScore(Board,X,Y,player,score).
-calcScore(_,x,y,player,score).
+calcScore(Board,Col,Player,Score):-getDropXY(Board,Col,(X,Y)),calcScore(Board,X,Y,Player,Score).
+calcScore(Board,X,Y,Player,Score):-getRow(Board,(X,Y),Row),countLineScore(Row,X,Score1,Player),getCol(Board,(X,Y),Col),countLineScore(Col,Y,Score2,Player),Score is Score1+Score2.
 
 countLineScore(L,PosX,Score,Player):-length(L,Taille),countLineScore(L,PosX,1,Score,Player,Taille).
 countLineScore(_,_,CurrentX,0,_,Taille):-CurrentX is Taille+1.
