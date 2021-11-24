@@ -98,6 +98,64 @@ getAI3Move(Board, 6) :- \+ isIllegal(Board, 6), wouldWin(Board, 6, 1).
 getAI3Move(Board, 7) :- \+ isIllegal(Board, 7), wouldWin(Board, 7, 1).
 getAI3Move(_, Move) :- random_between(1,7, Move).
 
+% play the game vs Annie's AI ----------------------------------------------------------------------------
+
+playAI23 :- tutorial, getBlankBoard(Board), nextPlayAI23(Board, 1).
+
+nextPlayAI23(Board, 1) :- nl,write('It is your turn.'),nl,nl,
+					  drawBoard(Board),
+					  read(Move),
+					  getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
+					  nextStateAI23(NewBoard, NewPlayer, OutDropXY).
+
+nextPlayAI23(Board, 2) :- nl,write('Computer is making move...'),nl,nl,
+					  drawBoard(Board),
+					  getAI23Move(Board, Move),
+					  nl,write('Computer dropped piece into column '),write(Move),nl,nl,
+					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
+					  nextStateAI23(NewBoard, NewPlayer, OutDropXY).
+
+
+nextStateAI23(Board, 2, DropXY) :- win(Board, 1, DropXY),nl, write('You win!'),nl, endmessage.
+nextStateAI23(Board, 1, DropXY) :- win(Board, 2, DropXY),nl, write('The computer wins!'),nl, endmessage.
+nextStateAI23(Board,_,_) :- isFull(Board),nl, write('It\'s a tie!'),nl, endmessage.
+nextStateAI23(Board, NewPlayer,_) :- nextPlayAI23(Board, NewPlayer).
+
+getAI23Move(Board, 1) :- \+ isIllegal(Board, 1), wouldWin(Board, 1, 2).
+getAI23Move(Board, 2) :- \+ isIllegal(Board, 2), wouldWin(Board, 2, 2).
+getAI23Move(Board, 3) :- \+ isIllegal(Board, 3), wouldWin(Board, 3, 2).
+getAI23Move(Board, 4) :- \+ isIllegal(Board, 4), wouldWin(Board, 4, 2).
+getAI23Move(Board, 5) :- \+ isIllegal(Board, 5), wouldWin(Board, 5, 2).
+getAI23Move(Board, 6) :- \+ isIllegal(Board, 6), wouldWin(Board, 6, 2).
+getAI23Move(Board, 7) :- \+ isIllegal(Board, 7), wouldWin(Board, 7, 2).
+
+getAI23Move(Board, 1) :- \+ isIllegal(Board, 1), wouldWin(Board, 1, 1).
+getAI23Move(Board, 2) :- \+ isIllegal(Board, 2), wouldWin(Board, 2, 1).
+getAI23Move(Board, 3) :- \+ isIllegal(Board, 3), wouldWin(Board, 3, 1).
+getAI23Move(Board, 4) :- \+ isIllegal(Board, 4), wouldWin(Board, 4, 1).
+getAI23Move(Board, 5) :- \+ isIllegal(Board, 5), wouldWin(Board, 5, 1).
+getAI23Move(Board, 6) :- \+ isIllegal(Board, 6), wouldWin(Board, 6, 1).
+getAI23Move(Board, 7) :- \+ isIllegal(Board, 7), wouldWin(Board, 7, 1).
+
+getAI23Move(_, Move) :- random_between(1,7, Move).
+
+maxValueList(	[[3,4,5,7,5,4,3],
+				[4,6,8,10,8,6,4],
+				[5,8,11,13,11,8,5],
+				[5,8,11,13,11,8,5],
+				[4,6,8,13,8,6,4],
+				[3,4,5,7,5,4,3]].
+
+				
+cellVal([], _, []).
+cellVal([[R, C]| L], X, [Y|Z]) :-
+    nth0(R, M, Row),
+    nth0(C, Row, Y),
+    cellVal(L, X, Z).
+
+% ----------------------------------------------------------------------------
+
+
 % true if Player dropping piece at DropCol would win
 wouldWin(Board, DropCol, Player) :- dropToken(Board, Player, DropCol, NewBoard), getDropXY(Board, DropCol, OutDropXY), win(NewBoard, Player, OutDropXY).
 
