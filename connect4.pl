@@ -235,6 +235,16 @@ endmessage :- write('Enter \'play.\' to play a 2 player game or \'playAI[1-3].\'
 
 % ----------------------------------------------------------------------------
 % Code par H4114
+%
+inversionPlayer(1,2).
+inversionPlayer(2,1).
+
+heuristic1(Board,Col,Player,50001):- \+ isIllegal(Board,Col),wouldWin(Board, Col, Player).
+heuristic1(Board,Col,Player,50000):- \+ isIllegal(Board,Col),inversionPlayer(Player,NotPlayer),wouldWin(Board, Col, NotPlayer).
+heuristic1(Board,Col,Player,Score):- \+ isIllegal(Board,Col),calcScore(Board,Col,Player,Score).
+heuristic1(_,_,_,-50003).
+
+%
 % Return the Score when player plays in the col
 calcScore(Board,Col,Player,Score):-getDropXY(Board,Col,(X,Y)),calcScore(Board,X,Y,Player,Score).
 calcScore(Board,X,Y,Player,Score):-getRow(Board,(X,Y),Row),countLineScore(Row,X,Score1,Player),
@@ -264,6 +274,13 @@ countLineScore([_|R],PosX,CurrentX,Score,Player,Taille):-is(NextX, CurrentX+1),c
 
 % Weighted board
 weight([[3,4,5,7,5,4,3],[4,6,8,10,8,6,4],[5,8,11,13,11,8,5],[5,8,11,13,11,8,5],[4,6,8,10,8,6,4],[3,4,5,7,5,4,3]]).
+
+
+heuristic2(Board,Col,Player,50001):- \+ isIllegal(Board,Col),wouldWin(Board, Col, Player).
+heuristic2(Board,Col,Player,50000):- \+ isIllegal(Board,Col),inversionPlayer(Player,NotPlayer),wouldWin(Board, Col, NotPlayer).
+heuristic2(Board,Col,Player,Score):- \+ isIllegal(Board,Col),dropToken(Board,Player,Col,NewBoard),boardScoreWeights(NewBoard,1,1,Score,Player).
+heuristic2(_,_,_,-50003).
+
 
 % Pour chaque position, si le jeton apartient a Player, on ajoute le
 % poids de la case au score
