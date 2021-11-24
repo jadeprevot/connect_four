@@ -261,9 +261,23 @@ endmessage :- write('Enter \'play.\' to play a 2 player game or \'playAI[1-3].\'
 
 %testGetElem(Out) :- getBlankBoard(Board), getElem(Board, 2, 4, 1, 1, Out).
 
+%Code par H4114
 %Return the Score when player plays in the col
 calcScore(Board,Col,Player,Score):-getDropXY(Board,Col,(X,Y)),calcScore(Board,X,Y,Player,Score).
-calcScore(Board,X,Y,Player,Score):-getRow(Board,(X,Y),Row),countLineScore(Row,X,Score1,Player),getCol(Board,(X,Y),Col),countLineScore(Col,Y,Score2,Player),Score is Score1+Score2.
+calcScore(Board,X,Y,Player,Score):-getRow(Board,(X,Y),Row),countLineScore(Row,X,Score1,Player),
+			           getCol(Board,(X,Y),Col),countLineScore(Col,Y,Score2,Player),
+				   posDiagDown(X,Y,I1),getDiagDown(Board,(X,Y),DiagDown),countLineScore(DiagDown,I1,Score3,Player),
+				   posDiagUp(X,Y,I2),calcPosBug(X,Y,X2,Y2),getDiagUp(Board,(X2,Y2),DiagUp),countLineScore(DiagUp,I2,Score4,Player),
+				   Score is Score1+Score2+Score3+Score4.
+
+posDiagDown(X,Y,I):-I is min(X,Y).
+posDiagUp(X,Y,I):-I is min(7-Y,X).
+
+% La clause deja implementé pour avoir les digonale montante ne marche
+% pas toujours, cette clause calcule une nouvelle paire de coordonnées
+% qui marchent.
+calcPosBug(X,Y,X,Y):-(X-(6-Y))<1.
+calcPosBug(X,Y,X2,6):-X2 is X-(6-Y).
 
 countLineScore(L,PosX,Score,Player):-length(L,Taille),countLineScore(L,PosX,1,Score,Player,Taille).
 countLineScore(_,_,CurrentX,0,_,Taille):-CurrentX is Taille+1.
