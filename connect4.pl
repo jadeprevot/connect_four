@@ -3,20 +3,17 @@
 % Enter 'play.' to play the 2-player game.
 % Enter 'playAI1.' to play the game versus the level 1 computer.
 
-% play the game vs level 1 AI ----------------------------------------------------------------------------
-playAI :- getBlankBoard(Board), nextPlayAI(Board, 1).
+% make two AIs play together ----------------------
+playAIvsAI :- getBlankBoard(Board), nextPlayAIvsAI(Board, 1).
 
-nextPlayAI(Board, 1) :- nl,write('It is your turn.'),nl,nl,
-					  getAI3Move(Board, Move),
+nextPlayAIvsAI(Board, 1) :- getAI3Move(Board, Move),
 					  nl,write('Yellow dropped piece into column '),write(Move),nl,nl,
 					  getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
 					  drawBoard(NewBoard),
 
 					  nextStateAI(NewBoard, NewPlayer, OutDropXY).
 
-nextPlayAI(Board, 2) :- nl,write('Computer is making move...'),nl,nl,
-					  drawBoard(Board),
-					  getAI1Move(Board, Move),
+nextPlayAIvsAI(Board, 2) :-getAIDepth0Move(Board, Move),
 					  nl,write('Red dropped piece into column '),write(Move),nl,nl,
 
 					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
@@ -27,22 +24,25 @@ nextPlayAI(Board, 2) :- nl,write('Computer is making move...'),nl,nl,
 nextStateAI(Board, 2, DropXY) :- win(Board, 1, DropXY),nl, write('Yellow wins!'),nl, endmessage.
 nextStateAI(Board, 1, DropXY) :- win(Board, 2, DropXY),nl, write('Red wins!'),nl, endmessage.
 nextStateAI(Board,_,_) :- isFull(Board),nl, write('It\'s a tie!'),nl, endmessage.
-nextStateAI(Board, NewPlayer,_) :- nextPlayAI(Board, NewPlayer).
+nextStateAI(Board, NewPlayer,_) :- nextPlayAIvsAI(Board, NewPlayer).
 
-getAI1Move(Board, Move) :- minMax(Board,0,true,2,Move).
 
-% play the game vs level 2 AI ----------------------------------------------------------------------------
-playAI2 :- getBlankBoard(Board), nextPlayAI2(Board, 1).
 
-nextPlayAI2(Board, 1) :- nl,write('It is your turn.'),nl,nl,
+getAIDepth0Move(Board, Move) :- minMax(Board,0,true,2,Move).
+
+% play the game vs an AI ---------
+
+playvsAI :- getBlankBoard(Board),nextPlayvsAI(Board, 1).
+
+nextPlayvsAI(Board, 1) :- nl,write('It is your turn.'),nl,nl,
 					  drawBoard(Board),
 					  read(Move),
 					  getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
 					  nextStateAI2(NewBoard, NewPlayer, OutDropXY).
 
-nextPlayAI2(Board, 2) :- nl,write('Computer is making move...'),nl,nl,
+nextPlayvsAI(Board, 2) :- nl,write('Computer is making move...'),nl,nl,
 					  drawBoard(Board),
-					  getAI2Move(Board, Move),
+					  getAIDepth0Move(Board, Move),
 					  nl,write('Computer dropped piece into column '),write(Move),nl,nl,
 					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
 					  nextStateAI2(NewBoard, NewPlayer, OutDropXY).
@@ -50,7 +50,7 @@ nextPlayAI2(Board, 2) :- nl,write('Computer is making move...'),nl,nl,
 nextStateAI2(Board, 2, DropXY) :- win(Board, 1, DropXY),nl, write('You win!'),nl, endmessage.
 nextStateAI2(Board, 1, DropXY) :- win(Board, 2, DropXY),nl, write('The computer wins!'),nl, endmessage.
 nextStateAI2(Board,_,_) :- isFull(Board),nl, write('It\'s a tie!'),nl, endmessage.
-nextStateAI2(Board, NewPlayer,_) :- nextPlayAI2(Board, NewPlayer).
+nextStateAI2(Board, NewPlayer,_) :- nextPlayvsAI(Board, NewPlayer).
 
 getAI2Move(Board, 1) :- \+ isIllegal(Board, 1).
 getAI2Move(Board, 2) :- \+ isIllegal(Board, 2).
