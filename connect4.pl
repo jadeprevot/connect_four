@@ -29,7 +29,7 @@ nextStateAI(Board, 1, DropXY) :- win(Board, 2, DropXY),nl, write('Red wins!'),nl
 nextStateAI(Board,_,_) :- isFull(Board),nl, write('It\'s a tie!'),nl, endmessage.
 nextStateAI(Board, NewPlayer,_) :- nextPlayAI(Board, NewPlayer).
 
-getAI1Move(_, Move) :- random_between(1,7, Move).
+getAI1Move(Board, Move) :- minMax(Board,0,true,2,Move).
 
 % play the game vs level 2 AI ----------------------------------------------------------------------------
 playAI2 :- getBlankBoard(Board), nextPlayAI2(Board, 1).
@@ -297,23 +297,23 @@ boardScoreWeights([[_|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|
 
 
 minMax(Node,0,true,Player,Value):-
-    calcScore(Node,1,Player,V1),
-    calcScore(Node,2,Player,V2),
-    calcScore(Node,3,Player,V3),
-    calcScore(Node,4,Player,V4),
-    calcScore(Node,5,Player,V5),
-    calcScore(Node,6,Player,V6),
-    calcScore(Node,7,Player,V7),
+    heuristic2(Node,1,Player,V1),
+    heuristic2(Node,2,Player,V2),
+    heuristic2(Node,3,Player,V3),
+    heuristic2(Node,4,Player,V4),
+    heuristic2(Node,5,Player,V5),
+    heuristic2(Node,6,Player,V6),
+    heuristic2(Node,7,Player,V7),
     getMaxMove([V1,V2,V3,V4,V5,V6,V7],Value),!.
 
 minMax(Node,0,false,Player,Value):-
-    calcScore(Node,1,Player,V1),
-    calcScore(Node,2,Player,V2),
-    calcScore(Node,3,Player,V3),
-    calcScore(Node,4,Player,V4),
-    calcScore(Node,5,Player,V5),
-    calcScore(Node,6,Player,V6),
-    calcScore(Node,7,Player,V7),
+    heuristic2(Node,1,Player,V1),
+    heuristic2(Node,2,Player,V2),
+    heuristic2(Node,3,Player,V3),
+    heuristic2(Node,4,Player,V4),
+    heuristic2(Node,5,Player,V5),
+    heuristic2(Node,6,Player,V6),
+    heuristic2(Node,7,Player,V7),
     getMinMove([V1,V2,V3,V4,V5,V6,V7],Value),!.
 
 minMax(Node,Depth,true,Player,Value):-Value is -99999,
