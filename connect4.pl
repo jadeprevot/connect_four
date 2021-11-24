@@ -233,6 +233,57 @@ endmessage :- write('Enter \'play.\' to play a 2 player game or \'playAI[1-3].\'
 
 %testGetElem(Out) :- getBlankBoard(Board), getElem(Board, 2, 4, 1, 1, Out).
 
+
+
+
+% Heuristic1---------------------------------------------
+heuristic1 :- getBlankBoard(Board), heuristic1(Board).
+
+% Detect if a list has 3 in a row of type Player
+
+threeInARow(_,_,3).
+threeInARow([H|T], H, Count) :- dif(Count, 3), is(NewCount, Count + 1), threeInARow(T, H, NewCount).
+threeInARow([H|T], Player, Count) :- dif(Count, 3), dif(H, Player), threeInARow(T, Player, 0).
+
+% Detect if a list has 2 in a row of type Player
+
+twoInARow(_,_,2).
+twoInARow([H|T], H, Count) :- dif(Count, 2), is(NewCount, Count + 1), twoInARow(T, H, NewCount).
+twoInARow([H|T], Player, Count) :- dif(Count, 2), dif(H, Player), twoInARow(T, Player, 0).
+
+% Detect if a list has 1 in a row of type Player
+
+oneInARow(_,_,1).
+oneInARow([H|T], H, Count) :- dif(Count, 1), is(NewCount, Count + 1), oneInARow(T, H, NewCount).
+oneInARow([H|T], Player, Count) :- dif(Count, 1), dif(H, Player), oneInARow(T, Player, 0).
+
+% Detect if a space is available around the token placed
+
+%isAvailableSpace(Board, Token, X, Y)
+
+% Detect if four chessmen are connected
+
+feature1 :- (fourInARow([H|T], Player, Count) ->
+            Value = 1.0Inf
+            ; true).
+
+% Detect if three chessmen are connected and A move can be made on
+% either immediately adjacent columns
+
+% TODO
+
+feature2 :- ((threeInARow([H|T], Player, Count), ((getElem([[H|_]|_], X+1, Y, 1, 1, H) =:= 0); (getElem([[H|_]|_], X, Y+1, X, Y, H) =:= 0); (getElem([[H|_]|_], X-1, Y, X, Y, H) =:= 0); (getElem([[H|_]|_], X, Y-1, X, Y, H) =:= 0))) ->
+            Value = 900000
+            ; true).
+
+%feature2bis :-
+
+
+
+
+
+
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% GUI
 
