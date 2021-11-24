@@ -262,6 +262,22 @@ countLineScore(_,PosX,CurrentX,0,_,_):- CurrentX is PosX+4.
 countLineScore([F|R],PosX,CurrentX,Score,Player,Taille):- PosX-CurrentX<4, F==Player, is(NextX, CurrentX+1), countLineScore(R,PosX,NextX,NextScore,Player,Taille),Score is NextScore+1.
 countLineScore([_|R],PosX,CurrentX,Score,Player,Taille):-is(NextX, CurrentX+1),countLineScore(R,PosX,NextX,Score,Player,Taille).
 
+% Weighted board
+weight([[3,4,5,7,5,4,3],[4,6,8,10,8,6,4],[5,8,11,13,11,8,5],[5,8,11,13,11,8,5],[4,6,8,10,8,6,4],[3,4,5,7,5,4,3]]).
+
+% Pour chaque position, si le jeton apartient a Player, on ajoute le
+% poids de la case au score
+% Si le jeton appartient a l'adversaire, on soustrait ce poids
+boardScoreWeights([],_,_,0,_).
+boardScoreWeights([[]|T],_,Y,Score,Player):- NewY is Y+1, boardScoreWeights(T,1,NewY,Score,Player).
+boardScoreWeights([[Player|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,NewScore,Player),
+                                                    weight(W),getElem(W,X,Y,1,1,Out),Score is NewScore+Out.
+boardScoreWeights([[0|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,Score,Player).
+boardScoreWeights([[_|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,NewScore,Player),
+                                                    weight(W),getElem(W,X,Y,1,1,Out),Score is NewScore-Out.
+
+
+
 
 
 
