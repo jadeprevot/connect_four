@@ -139,19 +139,25 @@ getAI23Move(Board, 7) :- \+ isIllegal(Board, 7), wouldWin(Board, 7, 1).
 
 getAI23Move(_, Move) :- random_between(1,7, Move).
 
-maxValueList(	[[3,4,5,7,5,4,3],
+% The max value of sets of 4 a piece can be in
+getMaxList(X) :- X = [[3,4,5,7,5,4,3],
 				[4,6,8,10,8,6,4],
 				[5,8,11,13,11,8,5],
 				[5,8,11,13,11,8,5],
 				[4,6,8,13,8,6,4],
 				[3,4,5,7,5,4,3]].
 
+			
 				
+% get value of a matrix	
 cellVal([], _, []).
 cellVal([[R, C]| L], X, [Y|Z]) :-
-    nth0(R, M, Row),
+    nth0(R, X, Row),
     nth0(C, Row, Y),
     cellVal(L, X, Z).
+
+
+
 
 % ----------------------------------------------------------------------------
 
@@ -318,6 +324,18 @@ drawBlankBoard :- getBlankBoard(Board), drawBoard(Board).
 endmessage :- write('Enter \'play.\' to play a 2 player game or \'playAI[1-3].\' to play against the computer.').
 
 %testGetElem(Out) :- getBlankBoard(Board), getElem(Board, 2, 4, 1, 1, Out).
+
+%Return the Score when player plays in the col
+calcScore(Board,Col,Player,Score):-getDropXY(Board,Col,(X,Y)),calcScore(Board,X,Y,Player,Score).
+calcScore(Board,X,Y,Player,Score):-getRow(Board,(X,Y),Row),countLineScore(Row,X,Score1,Player),getCol(Board,(X,Y),Col),countLineScore(Col,Y,Score2,Player),Score is Score1+Score2.
+
+countLineScore(L,PosX,Score,Player):-length(L,Taille),countLineScore(L,PosX,1,Score,Player,Taille).
+countLineScore(_,_,CurrentX,0,_,Taille):-CurrentX is Taille+1.
+countLineScore(_,PosX,CurrentX,0,_,_):- CurrentX is PosX+4.
+countLineScore([F|R],PosX,CurrentX,Score,Player,Taille):- PosX-CurrentX<4, F==Player, is(NextX, CurrentX+1), countLineScore(R,PosX,NextX,NextScore,Player,Taille),Score is NextScore+1.
+countLineScore([_|R],PosX,CurrentX,Score,Player,Taille):-is(NextX, CurrentX+1),countLineScore(R,PosX,NextX,Score,Player,Taille).
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% GUI
