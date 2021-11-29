@@ -295,7 +295,7 @@ boardScoreWeights([[_|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|
 
 
 % isDepthLimit(D, Node, true) :-
-% 	D is 0.
+%	D is 0.
 % isDepthLimit(D, Node, true) :-
 
 % isDepthLimit(D, Node, false) :-
@@ -322,7 +322,7 @@ minMax(Node,0,false,Player,Value):-
     heuristic2(Node,7,Player,V7),
     getMinMove([V1,V2,V3,V4,V5,V6,V7],Value),!.
 
-minMax(Node,Depth,true,Player,Value):-Value is -99999,
+minMax(Node,Depth,true,Player,Value):-
 	Depth1 is Depth - 1,
     getNextState(Node,Player,1,NewNode1,NewPlayer1,_), minMax(NewNode1,Depth1,false,NewPlayer1,V1),
     getNextState(Node,Player,2,NewNode2,NewPlayer2,_), minMax(NewNode2,Depth1,false,NewPlayer2,V2),
@@ -333,7 +333,7 @@ minMax(Node,Depth,true,Player,Value):-Value is -99999,
     getNextState(Node,Player,7,NewNode7,NewPlayer7,_), minMax(NewNode7,Depth1,false,NewPlayer7,V7),
     getMaxMove([V1,V2,V3,V4,V5,V6,V7],Value).
 
-minMax(Node,Depth,false,Player,Value):-Value is 99999,
+minMax(Node,Depth,false,Player,Value):-
 	Depth1 is Depth - 1,
     getNextState(Node,Player,1,NewNode1,NewPlayer1,_), minMax(NewNode1,Depth1,true,NewPlayer1,V1),
     getNextState(Node,Player,2,NewNode2,NewPlayer2,_), minMax(NewNode2,Depth1,true,NewPlayer2,V2),
