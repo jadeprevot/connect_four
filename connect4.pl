@@ -3,46 +3,82 @@
 % Enter 'play.' to play the 2-player game.
 % Enter 'playAI1.' to play the game versus the level 1 computer.
 
-% play the game vs level 1 AI ----------------------------------------------------------------------------
-playAI :- tutorial, getBlankBoard(Board), nextPlayAI(Board, 1).
+% Loop to measure heuristics ----------------------
 
-nextPlayAI(Board, 1) :- nl,write('It is your turn.'),nl,nl,
-					  getAI3Move(Board, Move),
-					  nl,write('Yellow dropped piece into column '),write(Move),nl,nl,
+to_100_matchs(100,V,V2) :- foocounter(V),foocounter2(V2),nl.
+to_100_matchs(X,V,V2) :-
+   playAIvsAI,
+   Y is X + 1,
+   to_100_matchs(Y,V,V2).
+
+:- dynamic foocounter/1.
+
+initfoo :-
+    retractall(foocounter(_)),
+    assertz(foocounter(0)).
+
+incrfoo :-
+    foocounter(V0),
+    retractall(foocounter(_)),
+    succ(V0, V),
+    assertz(foocounter(V)).
+
+:- dynamic foocounter2/1.
+
+initfoo2 :-
+    retractall(foocounter2(_)),
+    assertz(foocounter2(0)).
+
+incrfoo2 :-
+    foocounter2(V0),
+    retractall(foocounter2(_)),
+    succ(V0, V),
+    assertz(foocounter2(V)).
+
+
+
+% make two AIs play together ----------------------
+playAIvsAI :- getBlankBoard(Board), nextPlayAIvsAI(Board, 1).
+
+nextPlayAIvsAI(Board, 1) :- getAIlocDepth0Move(Board, Move),
+					  %nl,write('Yellow dropped piece into column '),write(Move),nl,nl,
 					  getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
 					  drawBoard(NewBoard),
 
 					  nextStateAI(NewBoard, NewPlayer, OutDropXY).
 
-nextPlayAI(Board, 2) :- nl,write('Computer is making move...'),nl,nl,
-					  drawBoard(Board),
-					  getAI1Move(Board, Move),
-					  nl,write('Red dropped piece into column '),write(Move),nl,nl,
+nextPlayAIvsAI(Board, 2) :-getAIdynDepth0Move(Board, Move),
+					  %nl,write('Red dropped piece into column '),write(Move),nl,nl,
 
 					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
 					  drawBoard(NewBoard),
 
 					  nextStateAI(NewBoard, NewPlayer, OutDropXY).
 
-nextStateAI(Board, 2, DropXY) :- win(Board, 1, DropXY),nl, write('Yellow wins!'),nl, endmessage.
-nextStateAI(Board, 1, DropXY) :- win(Board, 2, DropXY),nl, write('Red wins!'),nl, endmessage.
+nextStateAI(Board, 2, DropXY) :- win(Board, 1, DropXY),nl, write('Yellow wins!'),incrfoo,nl, endmessage.
+nextStateAI(Board, 1, DropXY) :- win(Board, 2, DropXY),nl, write('Red wins!'),incrfoo2,nl, endmessage.
 nextStateAI(Board,_,_) :- isFull(Board),nl, write('It\'s a tie!'),nl, endmessage.
-nextStateAI(Board, NewPlayer,_) :- nextPlayAI(Board, NewPlayer).
+nextStateAI(Board, NewPlayer,_) :- nextPlayAIvsAI(Board, NewPlayer).
 
-getAI1Move(_, Move) :- random_between(1,7, Move).
 
-% play the game vs level 2 AI ----------------------------------------------------------------------------
-playAI2 :- tutorial, getBlankBoard(Board), nextPlayAI2(Board, 1).
 
-nextPlayAI2(Board, 1) :- nl,write('It is your turn.'),nl,nl,
+getAIlocDepth0Move(Board, Move) :- minMax(Board,0,true,2,Move).
+getAIdynDepth0Move(Board, Move) :- minMax2(Board,0,true,2,Move).
+
+
+% play the game vs an AI ---------
+
+playvsAI :- getBlankBoard(Board),nextPlayvsAI(Board, 1).
+
+nextPlayvsAI(Board, 1) :- nl,write('It is your turn.'),nl,nl,
 					  drawBoard(Board),
 					  read(Move),
 					  getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
 					  nextStateAI2(NewBoard, NewPlayer, OutDropXY).
 
-nextPlayAI2(Board, 2) :- nl,write('Computer is making move...'),nl,nl,
+nextPlayvsAI(Board, 2) :- nl,write('Computer is making move...'),nl,nl,
 					  drawBoard(Board),
-					  getAI2Move(Board, Move),
+					  getAIlocDepth0Move(Board, Move),
 					  nl,write('Computer dropped piece into column '),write(Move),nl,nl,
 					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
 					  nextStateAI2(NewBoard, NewPlayer, OutDropXY).
@@ -50,8 +86,9 @@ nextPlayAI2(Board, 2) :- nl,write('Computer is making move...'),nl,nl,
 nextStateAI2(Board, 2, DropXY) :- win(Board, 1, DropXY),nl, write('You win!'),nl, endmessage.
 nextStateAI2(Board, 1, DropXY) :- win(Board, 2, DropXY),nl, write('The computer wins!'),nl, endmessage.
 nextStateAI2(Board,_,_) :- isFull(Board),nl, write('It\'s a tie!'),nl, endmessage.
-nextStateAI2(Board, NewPlayer,_) :- nextPlayAI2(Board, NewPlayer).
+nextStateAI2(Board, NewPlayer,_) :- nextPlayvsAI(Board, NewPlayer).
 
+getAI1Move(_, Move) :- random_between(1,7, Move).
 getAI2Move(Board, 1) :- \+ isIllegal(Board, 1).
 getAI2Move(Board, 2) :- \+ isIllegal(Board, 2).
 getAI2Move(Board, 3) :- \+ isIllegal(Board, 3).
@@ -61,7 +98,7 @@ getAI2Move(Board, 6) :- \+ isIllegal(Board, 6).
 getAI2Move(Board, 7) :- \+ isIllegal(Board, 7).
 
 % play the game vs level 3 AI ----------------------------------------------------------------------------
-playAI3 :- tutorial, getBlankBoard(Board), nextPlayAI3(Board, 1).
+playAI3 :-  getBlankBoard(Board), nextPlayAI3(Board, 1).
 
 nextPlayAI3(Board, 1) :- nl,write('It is your turn.'),nl,nl,
 					  drawBoard(Board),
@@ -101,31 +138,9 @@ getAI3Move(_, Move) :- random_between(1,7, Move).
 % true if Player dropping piece at DropCol would win
 wouldWin(Board, DropCol, Player) :- dropToken(Board, Player, DropCol, NewBoard), getDropXY(Board, DropCol, OutDropXY), win(NewBoard, Player, OutDropXY).
 
-% play the game in 2 player mode ------------------------------------------------------------------------
-play :- tutorial, getBlankBoard(Board), nextPlay(Board, 1).
-
-nextPlay(Board, 1) :- %whosturn(1),
-			    drawBoard(Board),
-			    get(connect4(1), prompt, X),
-			    atom_number(X, Move),
-			    getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
-					  nextState(NewBoard, NewPlayer, OutDropXY).
-
-nextPlay(Board, 2) :- %whosturn(2),
-			    drawBoard(Board),
-			    get(connect4(2), prompt, X),
-			    atom_number(X, Move),
-					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
-					  nextState(NewBoard, NewPlayer, OutDropXY).
-
 getNextState(InitBoard, InitPlayer, DropCol, InitBoard, InitPlayer,(1,1)) :- isIllegal(InitBoard, DropCol),nl, write('Illegal move.'),nl.
 getNextState(InitBoard, 1, DropCol, NewBoard, NewPlayer, OutDropXY) :- dropToken(InitBoard, 1, DropCol, NewBoard), getDropXY(InitBoard, DropCol, OutDropXY), NewPlayer = 2.
 getNextState(InitBoard, 2, DropCol, NewBoard, NewPlayer, OutDropXY) :- dropToken(InitBoard, 2, DropCol, NewBoard), getDropXY(InitBoard, DropCol, OutDropXY), NewPlayer = 1.
-
-nextState(Board, 2, DropXY) :- win(Board, 1, DropXY),nl, write('Player '),write(1),write(' wins!'),nl, endmessage.
-nextState(Board, 1, DropXY) :- win(Board, 2, DropXY),nl, write('Player '),write(2),write(' wins!'),nl, endmessage.
-nextState(Board,_,_) :- isFull(Board),nl, write('It\'s a tie!'),nl, endmessage.
-nextState(Board, NewPlayer,_) :- nextPlay(Board, NewPlayer).
 
 win(Board, Player, Move) :- getRow(Board, Move, OutRow), fourInARow(OutRow, Player, 0).
 win(Board, Player, Move) :- getCol(Board, Move, OutCol), fourInARow(OutCol, Player, 0).
@@ -136,12 +151,6 @@ win(Board, Player, Move) :- getDiagUp(Board, Move, OutDiag), fourInARow(OutDiag,
 isIllegal(_, DropCol) :- DropCol > 7.
 isIllegal(_, DropCol) :- DropCol < 1.
 isIllegal(Board, DropCol) :- getElem(Board, DropCol, 1, 1, 1, OutElem), dif(OutElem, 0).
-
-% say whos turn it is
-whosturn(Player) :- nl,nl,write('It is player '), write(Player), write('\'s turn.'),nl,nl.
-
-%print the tutorial
-tutorial :- write('Play by entering an integer position of the column to drop your piece into.'),nl,nl.
 
 % take a board, a player, and a column and return the board with the player's token dropped at the column
 
@@ -263,21 +272,30 @@ endmessage :- write('Enter \'play.\' to play a 2 player game or \'playAI[1-3].\'
 
 % ----------------------------------------------------------------------------
 % Code par H4114
+%
+inversionPlayer(1,2).
+inversionPlayer(2,1).
+
+heuristic1(Board,Col,Player,50001):- \+ isIllegal(Board,Col),wouldWin(Board, Col, Player).
+heuristic1(Board,Col,Player,50000):- \+ isIllegal(Board,Col),inversionPlayer(Player,NotPlayer),wouldWin(Board, Col, NotPlayer).
+heuristic1(Board,Col,Player,Score):- \+ isIllegal(Board,Col),calcScore(Board,Col,Player,Score).
+heuristic1(_,_,_,-50003).
+
+%
 % Return the Score when player plays in the col
 calcScore(Board,Col,Player,Score):-getDropXY(Board,Col,(X,Y)),calcScore(Board,X,Y,Player,Score).
 calcScore(Board,X,Y,Player,Score):-getRow(Board,(X,Y),Row),countLineScore(Row,X,Score1,Player),
 			           getCol(Board,(X,Y),Col),countLineScore(Col,Y,Score2,Player),
 				   posDiagDown(X,Y,I1),getDiagDown(Board,(X,Y),DiagDown),countLineScore(DiagDown,I1,Score3,Player),
 				   posDiagUp(X,Y,I2),calcPosBug(X,Y,X2,Y2),getDiagUp(Board,(X2,Y2),DiagUp),countLineScore(DiagUp,I2,Score4,Player),
-				   Score is Score1.
-				   %(+Score2+Score3+Score4.)
+				   Score is Score1+Score2+Score3+Score4.
 
-%I est la position dans la diagonale du point de coordonnées X Y
+%I est la position dans la diagonale du point de coordonnï¿½es X Y
 posDiagDown(X,Y,I):-I is min(X,Y).
 posDiagUp(X,Y,I):-I is min(7-Y,X).
 
-% La clause deja implementé pour avoir les digonale montante ne marche
-% pas toujours, cette clause calcule une nouvelle paire de coordonnées
+% La clause deja implementï¿½ pour avoir les digonale montante ne marche
+% pas toujours, cette clause calcule une nouvelle paire de coordonnï¿½es
 % qui marchent.
 calcPosBug(X,Y,X,Y):-(X-(6-Y))<1.
 calcPosBug(X,Y,X2,6):-X2 is X-(6-Y).
@@ -292,15 +310,6 @@ countLineScore([F|R],PosX,CurrentX,Score,Player,Taille):- PosX-CurrentX<4, F==Pl
 countLineScore([_|R],PosX,CurrentX,Score,Player,Taille):-is(NextX, CurrentX+1),countLineScore(R,PosX,NextX,Score,Player,Taille).
 
 % Annie's test
-% The max value of sets of 4 a piece can be in
-getMaxList(X) :- X = [[3,4,5,7,5,4,3],
-				[4,6,8,10,8,6,4],
-				[5,8,11,13,11,8,5],
-				[5,8,11,13,11,8,5],
-				[4,6,8,13,8,6,4],
-				[3,4,5,7,5,4,3]].
-
-		
 				
 % get value of a matrix	
 cellVal([], _, []).
@@ -321,18 +330,142 @@ calcScore2(Board,X,Y,Player,Score):-getRow(Board,(X,Y),Row),countLineScore2(Row,
 
 %(On calcule le score autour de la position initiale, en mettant Ã  0 si un pion ennemi est sur notre ligne si non, 1)
 countLineScore2(L,PosX,Score,Player):-length(L,Taille),countLineScore2(L,PosX,1,Score,Player,Taille).
-countLineScore2(_,_,CurrentX,0,_,Taille):-CurrentX is Taille+1.
-countLineScore2(_,PosX,CurrentX,0,_,_):- CurrentX is PosX+1.
-countLineScore2([F|R],PosX,CurrentX,Score,Player,Taille):- PosX-CurrentX<4, F==Player, is(NextX, CurrentX+1), countLineScore2(R,PosX,NextX,NextScore,Player,Taille),Score is NextScore+1.
-countLineScore2([F|R],PosX,CurrentX,Score,Player,Taille):- PosX-CurrentX<4, F\=Player, is(NextX, CurrentX+1), countLineScore2(R,PosX,NextX,NextScore,Player,Taille),Score is -99.
+countLineScore2(_,PosX,CurrentX,0,_,_):- CurrentX is PosX.
+countLineScore2([F|R],PosX,CurrentX,Score,Player,Taille):- PosX-CurrentX<4, is(EndX, CurrentX+3), countSubLineScore([F|R],EndX,CurrentX,SubScore,Player,Taille) , is(NextX, CurrentX+1), Score is SubScore . % countLineScore2(R,PosX,NextX,NextScore,Player,Taille), Score is NextScore+SubScore.
 countLineScore2([_|R],PosX,CurrentX,Score,Player,Taille):-is(NextX, CurrentX+1),countLineScore2(R,PosX,NextX,Score,Player,Taille).
+	
+countSubLineScore([F|R],EndX,CurrentX,Score,Player,Taille):- EndX-CurrentX<4, F==Player, is(NextX, CurrentX+1), countSubLineScore(R,EndX,NextX,NextScore,Player,Taille),Score is NextScore+1.
+countSubLineScore([F|R],EndX,CurrentX,Score,Player,Taille):- EndX-CurrentX<4, F\= 0, F\=Player, is(NextX, CurrentX+1), countSubLineScore(R,EndX,NextX,NextScore,Player,Taille),Score is -99.
+countSubLineScore([_|R],EndX,CurrentX,Score,Player,Taille):-is(NextX, CurrentX+1),countSubLineScore(R,EndX,NextX,Score,Player,Taille).
+countSubLineScore(_,EndX,CurrentX,0,_,_):- CurrentX is EndX+4.
+countSubLineScore(_,_,CurrentX,0,_,Taille):-CurrentX is Taille+1.
 	
 
 % If the score is negative, its 0, else, 1
 fixScore(In,0):-In<0.
 fixScore(_,1).
 
+% end of Anni's test
 
+% Weighted board
+weight([[3,4,5,7,5,4,3],[4,6,8,10,8,6,4],[5,8,11,13,11,8,5],[5,8,11,13,11,8,5],[4,6,8,10,8,6,4],[3,4,5,7,5,4,3]]).
+
+
+heuristic2(Board,Col,Player,50001):- \+ isIllegal(Board,Col),wouldWin(Board, Col, Player).
+heuristic2(Board,Col,Player,50000):- \+ isIllegal(Board,Col),inversionPlayer(Player,NotPlayer),wouldWin(Board, Col, NotPlayer).
+heuristic2(Board,Col,Player,Score):- \+ isIllegal(Board,Col),dropToken(Board,Player,Col,NewBoard),boardScoreWeights(NewBoard,1,1,Score,Player).
+heuristic2(_,_,_,-50003).
+
+
+% Pour chaque position, si le jeton apartient a Player, on ajoute le
+% poids de la case au score
+% Si le jeton appartient a l'adversaire, on soustrait ce poids
+boardScoreWeights([],_,_,0,_).
+boardScoreWeights([[]|T],_,Y,Score,Player):- NewY is Y+1, boardScoreWeights(T,1,NewY,Score,Player).
+boardScoreWeights([[Player|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,NewScore,Player),
+                                                    weight(W),getElem(W,X,Y,1,1,Out),Score is NewScore+Out.
+boardScoreWeights([[0|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,Score,Player).
+boardScoreWeights([[_|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,NewScore,Player),
+                                                    weight(W),getElem(W,X,Y,1,1,Out),Score is NewScore-Out.
+
+
+% isDepthLimit(D, Node, true) :-
+%	D is 0.
+% isDepthLimit(D, Node, true) :-
+
+% isDepthLimit(D, Node, false) :-
+
+minMax2(Node,0,true,Player,Value):-
+    heuristic2(Node,1,Player,V1),
+    heuristic2(Node,2,Player,V2),
+    heuristic2(Node,3,Player,V3),
+    heuristic2(Node,4,Player,V4),
+    heuristic2(Node,5,Player,V5),
+    heuristic2(Node,6,Player,V6),
+    heuristic2(Node,7,Player,V7),
+    getMaxMove([V1,V2,V3,V4,V5,V6,V7],Value),!.
+
+minMax2(Node,0,false,Player,Value):-
+    heuristic2(Node,1,Player,V1),
+    heuristic2(Node,2,Player,V2),
+    heuristic2(Node,3,Player,V3),
+    heuristic2(Node,4,Player,V4),
+    heuristic2(Node,5,Player,V5),
+    heuristic2(Node,6,Player,V6),
+    heuristic2(Node,7,Player,V7),
+    getMinMove([V1,V2,V3,V4,V5,V6,V7],Value),!.
+
+minMax2(Node,Depth,true,Player,Value):-
+	Depth1 is Depth - 1,
+    getNextState(Node,Player,1,NewNode1,NewPlayer1,_), minMax2(NewNode1,Depth1,false,NewPlayer1,V1),
+    getNextState(Node,Player,2,NewNode2,NewPlayer2,_), minMax2(NewNode2,Depth1,false,NewPlayer2,V2),
+    getNextState(Node,Player,3,NewNode3,NewPlayer3,_), minMax2(NewNode3,Depth1,false,NewPlayer3,V3),
+    getNextState(Node,Player,4,NewNode4,NewPlayer4,_), minMax2(NewNode4,Depth1,false,NewPlayer4,V4),
+    getNextState(Node,Player,5,NewNode5,NewPlayer5,_), minMax2(NewNode5,Depth1,false,NewPlayer5,V5),
+    getNextState(Node,Player,6,NewNode6,NewPlayer6,_), minMax2(NewNode6,Depth1,false,NewPlayer6,V6),
+    getNextState(Node,Player,7,NewNode7,NewPlayer7,_), minMax2(NewNode7,Depth1,false,NewPlayer7,V7),
+    getMaxMove([V1,V2,V3,V4,V5,V6,V7],Value).
+
+minMax2(Node,Depth,false,Player,Value):-
+	Depth1 is Depth - 1,
+    getNextState(Node,Player,1,NewNode1,NewPlayer1,_), minMax2(NewNode1,Depth1,true,NewPlayer1,V1),
+    getNextState(Node,Player,2,NewNode2,NewPlayer2,_), minMax2(NewNode2,Depth1,true,NewPlayer2,V2),
+    getNextState(Node,Player,3,NewNode3,NewPlayer3,_), minMax2(NewNode3,Depth1,true,NewPlayer3,V3),
+    getNextState(Node,Player,4,NewNode4,NewPlayer4,_), minMax2(NewNode4,Depth1,true,NewPlayer4,V4),
+    getNextState(Node,Player,5,NewNode5,NewPlayer5,_), minMax2(NewNode5,Depth1,true,NewPlayer5,V5),
+    getNextState(Node,Player,6,NewNode6,NewPlayer6,_), minMax2(NewNode6,Depth1,true,NewPlayer6,V6),
+    getNextState(Node,Player,7,NewNode7,NewPlayer7,_), minMax2(NewNode7,Depth1,true,NewPlayer7,V7),
+    getMinMove([V1,V2,V3,V4,V5,V6,V7],Value).
+
+
+minMax(Node,0,true,Player,Value):-
+    heuristic1(Node,1,Player,V1),
+    heuristic1(Node,2,Player,V2),
+    heuristic1(Node,3,Player,V3),
+    heuristic1(Node,4,Player,V4),
+    heuristic1(Node,5,Player,V5),
+    heuristic1(Node,6,Player,V6),
+    heuristic1(Node,7,Player,V7),
+    getMaxMove([V1,V2,V3,V4,V5,V6,V7],Value),!.
+
+minMax(Node,0,false,Player,Value):-
+    heuristic1(Node,1,Player,V1),
+    heuristic1(Node,2,Player,V2),
+    heuristic1(Node,3,Player,V3),
+    heuristic1(Node,4,Player,V4),
+    heuristic1(Node,5,Player,V5),
+    heuristic1(Node,6,Player,V6),
+    heuristic1(Node,7,Player,V7),
+    getMinMove([V1,V2,V3,V4,V5,V6,V7],Value),!.
+
+minMax(Node,Depth,true,Player,Value):-
+	Depth1 is Depth - 1,
+    getNextState(Node,Player,1,NewNode1,NewPlayer1,_), minMax(NewNode1,Depth1,false,NewPlayer1,V1),
+    getNextState(Node,Player,2,NewNode2,NewPlayer2,_), minMax(NewNode2,Depth1,false,NewPlayer2,V2),
+    getNextState(Node,Player,3,NewNode3,NewPlayer3,_), minMax(NewNode3,Depth1,false,NewPlayer3,V3),
+    getNextState(Node,Player,4,NewNode4,NewPlayer4,_), minMax(NewNode4,Depth1,false,NewPlayer4,V4),
+    getNextState(Node,Player,5,NewNode5,NewPlayer5,_), minMax(NewNode5,Depth1,false,NewPlayer5,V5),
+    getNextState(Node,Player,6,NewNode6,NewPlayer6,_), minMax(NewNode6,Depth1,false,NewPlayer6,V6),
+    getNextState(Node,Player,7,NewNode7,NewPlayer7,_), minMax(NewNode7,Depth1,false,NewPlayer7,V7),
+    getMaxMove([V1,V2,V3,V4,V5,V6,V7],Value).
+
+minMax(Node,Depth,false,Player,Value):-
+	Depth1 is Depth - 1,
+    getNextState(Node,Player,1,NewNode1,NewPlayer1,_), minMax(NewNode1,Depth1,true,NewPlayer1,V1),
+    getNextState(Node,Player,2,NewNode2,NewPlayer2,_), minMax(NewNode2,Depth1,true,NewPlayer2,V2),
+    getNextState(Node,Player,3,NewNode3,NewPlayer3,_), minMax(NewNode3,Depth1,true,NewPlayer3,V3),
+    getNextState(Node,Player,4,NewNode4,NewPlayer4,_), minMax(NewNode4,Depth1,true,NewPlayer4,V4),
+    getNextState(Node,Player,5,NewNode5,NewPlayer5,_), minMax(NewNode5,Depth1,true,NewPlayer5,V5),
+    getNextState(Node,Player,6,NewNode6,NewPlayer6,_), minMax(NewNode6,Depth1,true,NewPlayer6,V6),
+    getNextState(Node,Player,7,NewNode7,NewPlayer7,_), minMax(NewNode7,Depth1,true,NewPlayer7,V7),
+    getMinMove([V1,V2,V3,V4,V5,V6,V7],Value).
+
+
+% X is the postion of the highest element in the list L.
+getMaxMove(L, X) :- max_list(L, Y), nth1(X, L, Y),!.
+
+% X is the postion of the lowest element in the list L.
+getMinMove(L, X) :- min_list(L, Y), nth1(X, L, Y),!.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% GUI
@@ -365,3 +498,15 @@ prompt(W, Value:name) :<-
 :- pce_end_class.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+
+
+
+
+
