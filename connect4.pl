@@ -269,7 +269,8 @@ calcScore(Board,X,Y,Player,Score):-getRow(Board,(X,Y),Row),countLineScore(Row,X,
 			           getCol(Board,(X,Y),Col),countLineScore(Col,Y,Score2,Player),
 				   posDiagDown(X,Y,I1),getDiagDown(Board,(X,Y),DiagDown),countLineScore(DiagDown,I1,Score3,Player),
 				   posDiagUp(X,Y,I2),calcPosBug(X,Y,X2,Y2),getDiagUp(Board,(X2,Y2),DiagUp),countLineScore(DiagUp,I2,Score4,Player),
-				   Score is Score1+Score2+Score3+Score4.
+				   Score is Score1.
+				   %(+Score2+Score3+Score4.)
 
 %I est la position dans la diagonale du point de coordonnées X Y
 posDiagDown(X,Y,I):-I is min(X,Y).
@@ -290,7 +291,7 @@ countLineScore(_,PosX,CurrentX,0,_,_):- CurrentX is PosX+4.
 countLineScore([F|R],PosX,CurrentX,Score,Player,Taille):- PosX-CurrentX<4, F==Player, is(NextX, CurrentX+1), countLineScore(R,PosX,NextX,NextScore,Player,Taille),Score is NextScore+1.
 countLineScore([_|R],PosX,CurrentX,Score,Player,Taille):-is(NextX, CurrentX+1),countLineScore(R,PosX,NextX,Score,Player,Taille).
 
-%%% Annie's test
+% Annie's test
 % The max value of sets of 4 a piece can be in
 getMaxList(X) :- X = [[3,4,5,7,5,4,3],
 				[4,6,8,10,8,6,4],
@@ -299,7 +300,7 @@ getMaxList(X) :- X = [[3,4,5,7,5,4,3],
 				[4,6,8,13,8,6,4],
 				[3,4,5,7,5,4,3]].
 
-			
+		
 				
 % get value of a matrix	
 cellVal([], _, []).
@@ -307,8 +308,30 @@ cellVal([[R, C]| L], X, [Y|Z]) :-
     nth0(R, X, Row),
     nth0(C, Row, Y),
     cellVal(L, X, Z).
+	
+% Return the Score when player plays in the col
+calcScore2(Board,Col,Player,Score):-getDropXY(Board,Col,(X,Y)),calcScore2(Board,X,Y,Player,Score).
+calcScore2(Board,X,Y,Player,Score):-getRow(Board,(X,Y),Row),countLineScore2(Row,X,Score1,Player),
+			   getCol(Board,(X,Y),Col),countLineScore2(Col,Y,Score2,Player),
+		   posDiagDown(X,Y,I1),getDiagDown(Board,(X,Y),DiagDown),countLineScore2(DiagDown,I1,Score3,Player),
+		   posDiagUp(X,Y,I2),calcPosBug(X,Y,X2,Y2),getDiagUp(Board,(X2,Y2),DiagUp),countLineScore2(DiagUp,I2,Score4,Player),
+		   fixScore(Score1,Score1b),fixScore(Score2,Score2b),fixScore(Score3,Score3b),fixScore(Score4,Score4b),
+		   Score is Score1b. 
+		   %(+Score2b+Score3b+Score4b.)
 
-%%%
+%(On calcule le score autour de la position initiale, en mettant Ã  0 si un pion ennemi est sur notre ligne si non, 1)
+countLineScore2(L,PosX,Score,Player):-length(L,Taille),countLineScore2(L,PosX,1,Score,Player,Taille).
+countLineScore2(_,_,CurrentX,0,_,Taille):-CurrentX is Taille+1.
+countLineScore2(_,PosX,CurrentX,0,_,_):- CurrentX is PosX+1.
+countLineScore2([F|R],PosX,CurrentX,Score,Player,Taille):- PosX-CurrentX<4, F==Player, is(NextX, CurrentX+1), countLineScore2(R,PosX,NextX,NextScore,Player,Taille),Score is NextScore+1.
+countLineScore2([F|R],PosX,CurrentX,Score,Player,Taille):- PosX-CurrentX<4, F\=Player, is(NextX, CurrentX+1), countLineScore2(R,PosX,NextX,NextScore,Player,Taille),Score is -99.
+countLineScore2([_|R],PosX,CurrentX,Score,Player,Taille):-is(NextX, CurrentX+1),countLineScore2(R,PosX,NextX,Score,Player,Taille).
+	
+
+% If the score is negative, its 0, else, 1
+fixScore(In,0):-In<0.
+fixScore(_,1).
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
