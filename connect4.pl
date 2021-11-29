@@ -294,6 +294,12 @@ boardScoreWeights([[_|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|
                                                     weight(W),getElem(W,X,Y,1,1,Out),Score is NewScore-Out.
 
 
+% isDepthLimit(D, Node, true) :-
+% 	D is 0.
+% isDepthLimit(D, Node, true) :-
+
+% isDepthLimit(D, Node, false) :-
+
 
 
 minMax(Node,0,true,Player,Value):-
@@ -318,24 +324,24 @@ minMax(Node,0,false,Player,Value):-
 
 minMax(Node,Depth,true,Player,Value):-Value is -99999,
 	Depth1 is Depth - 1,
-    getNextState(Node,Player,1,NewNode1,NewPlayer,OutDropXY), minMax(NewNode1,Depth1,false,Player,V1),
-    getNextState(Node,Player,2,NewNode2,NewPlayer,OutDropXY), minMax(NewNode2,Depth1,false,Player,V2),
-    getNextState(Node,Player,3,NewNode3,NewPlayer,OutDropXY), minMax(NewNode3,Depth1,false,Player,V3),
-    getNextState(Node,Player,4,NewNode4,NewPlayer,OutDropXY), minMax(NewNode4,Depth1,false,Player,V4),
-    getNextState(Node,Player,5,NewNode5,NewPlayer,OutDropXY), minMax(NewNode5,Depth1,false,Player,V5),
-    getNextState(Node,Player,6,NewNode6,NewPlayer,OutDropXY), minMax(NewNode6,Depth1,false,Player,V6),
-    getNextState(Node,Player,7,NewNode7,NewPlayer,OutDropXY), minMax(NewNode7,Depth1,false,Player,V7),
+    getNextState(Node,Player,1,NewNode1,NewPlayer1,_), minMax(NewNode1,Depth1,false,NewPlayer1,V1),
+    getNextState(Node,Player,2,NewNode2,NewPlayer2,_), minMax(NewNode2,Depth1,false,NewPlayer2,V2),
+    getNextState(Node,Player,3,NewNode3,NewPlayer3,_), minMax(NewNode3,Depth1,false,NewPlayer3,V3),
+    getNextState(Node,Player,4,NewNode4,NewPlayer4,_), minMax(NewNode4,Depth1,false,NewPlayer4,V4),
+    getNextState(Node,Player,5,NewNode5,NewPlayer5,_), minMax(NewNode5,Depth1,false,NewPlayer5,V5),
+    getNextState(Node,Player,6,NewNode6,NewPlayer6,_), minMax(NewNode6,Depth1,false,NewPlayer6,V6),
+    getNextState(Node,Player,7,NewNode7,NewPlayer7,_), minMax(NewNode7,Depth1,false,NewPlayer7,V7),
     getMaxMove([V1,V2,V3,V4,V5,V6,V7],Value).
 
 minMax(Node,Depth,false,Player,Value):-Value is 99999,
 	Depth1 is Depth - 1,
-    getNextState(Node,Player,1,NewNode1,NewPlayer,OutDropXY), minMax(NewNode1,Depth1,true,Player,V1),
-    getNextState(Node,Player,2,NewNode2,NewPlayer,OutDropXY), minMax(NewNode2,Depth1,true,Player,V2),
-    getNextState(Node,Player,3,NewNode3,NewPlayer,OutDropXY), minMax(NewNode3,Depth1,true,Player,V3),
-    getNextState(Node,Player,4,NewNode4,NewPlayer,OutDropXY), minMax(NewNode4,Depth1,true,Player,V4),
-    getNextState(Node,Player,5,NewNode5,NewPlayer,OutDropXY), minMax(NewNode5,Depth1,true,Player,V5),
-    getNextState(Node,Player,6,NewNode6,NewPlayer,OutDropXY), minMax(NewNode6,Depth1,true,Player,V6),
-    getNextState(Node,Player,7,NewNode7,NewPlayer,OutDropXY), minMax(NewNode7,Depth1,true,Player,V7),
+    getNextState(Node,Player,1,NewNode1,NewPlayer1,_), minMax(NewNode1,Depth1,true,NewPlayer1,V1),
+    getNextState(Node,Player,2,NewNode2,NewPlayer2,_), minMax(NewNode2,Depth1,true,NewPlayer2,V2),
+    getNextState(Node,Player,3,NewNode3,NewPlayer3,_), minMax(NewNode3,Depth1,true,NewPlayer3,V3),
+    getNextState(Node,Player,4,NewNode4,NewPlayer4,_), minMax(NewNode4,Depth1,true,NewPlayer4,V4),
+    getNextState(Node,Player,5,NewNode5,NewPlayer5,_), minMax(NewNode5,Depth1,true,NewPlayer5,V5),
+    getNextState(Node,Player,6,NewNode6,NewPlayer6,_), minMax(NewNode6,Depth1,true,NewPlayer6,V6),
+    getNextState(Node,Player,7,NewNode7,NewPlayer7,_), minMax(NewNode7,Depth1,true,NewPlayer7,V7),
     getMinMove([V1,V2,V3,V4,V5,V6,V7],Value).
 
 
