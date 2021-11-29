@@ -253,12 +253,12 @@ calcScore(Board,X,Y,Player,Score):-getRow(Board,(X,Y),Row),countLineScore(Row,X,
 				   posDiagUp(X,Y,I2),calcPosBug(X,Y,X2,Y2),getDiagUp(Board,(X2,Y2),DiagUp),countLineScore(DiagUp,I2,Score4,Player),
 				   Score is Score1+Score2+Score3+Score4.
 
-%I est la position dans la diagonale du point de coordonnées X Y
+%I est la position dans la diagonale du point de coordonnï¿½es X Y
 posDiagDown(X,Y,I):-I is min(X,Y).
 posDiagUp(X,Y,I):-I is min(7-Y,X).
 
-% La clause deja implementé pour avoir les digonale montante ne marche
-% pas toujours, cette clause calcule une nouvelle paire de coordonnées
+% La clause deja implementï¿½ pour avoir les digonale montante ne marche
+% pas toujours, cette clause calcule une nouvelle paire de coordonnï¿½es
 % qui marchent.
 calcPosBug(X,Y,X,Y):-(X-(6-Y))<1.
 calcPosBug(X,Y,X2,6):-X2 is X-(6-Y).
@@ -317,6 +317,7 @@ minMax(Node,0,false,Player,Value):-
     getMinMove([V1,V2,V3,V4,V5,V6,V7],Value),!.
 
 minMax(Node,Depth,true,Player,Value):-Value is -99999,
+	Depth1 is Depth - 1,
     getNextState(Node,Player,1,NewNode1,NewPlayer,OutDropXY), minMax(NewNode1,Depth1,false,Player,V1),
     getNextState(Node,Player,2,NewNode2,NewPlayer,OutDropXY), minMax(NewNode2,Depth1,false,Player,V2),
     getNextState(Node,Player,3,NewNode3,NewPlayer,OutDropXY), minMax(NewNode3,Depth1,false,Player,V3),
@@ -324,10 +325,10 @@ minMax(Node,Depth,true,Player,Value):-Value is -99999,
     getNextState(Node,Player,5,NewNode5,NewPlayer,OutDropXY), minMax(NewNode5,Depth1,false,Player,V5),
     getNextState(Node,Player,6,NewNode6,NewPlayer,OutDropXY), minMax(NewNode6,Depth1,false,Player,V6),
     getNextState(Node,Player,7,NewNode7,NewPlayer,OutDropXY), minMax(NewNode7,Depth1,false,Player,V7),
-    getMaxMove([V1,V2,V3,V4,V5,V6,V7],Value),
-    Depth is Depth1 + 1.
+    getMaxMove([V1,V2,V3,V4,V5,V6,V7],Value).
 
 minMax(Node,Depth,false,Player,Value):-Value is 99999,
+	Depth1 is Depth - 1,
     getNextState(Node,Player,1,NewNode1,NewPlayer,OutDropXY), minMax(NewNode1,Depth1,true,Player,V1),
     getNextState(Node,Player,2,NewNode2,NewPlayer,OutDropXY), minMax(NewNode2,Depth1,true,Player,V2),
     getNextState(Node,Player,3,NewNode3,NewPlayer,OutDropXY), minMax(NewNode3,Depth1,true,Player,V3),
@@ -335,14 +336,14 @@ minMax(Node,Depth,false,Player,Value):-Value is 99999,
     getNextState(Node,Player,5,NewNode5,NewPlayer,OutDropXY), minMax(NewNode5,Depth1,true,Player,V5),
     getNextState(Node,Player,6,NewNode6,NewPlayer,OutDropXY), minMax(NewNode6,Depth1,true,Player,V6),
     getNextState(Node,Player,7,NewNode7,NewPlayer,OutDropXY), minMax(NewNode7,Depth1,true,Player,V7),
-    getMinMove([V1,V2,V3,V4,V5,V6,V7],Value),
-    Depth is Depth1 + 1.
+    getMinMove([V1,V2,V3,V4,V5,V6,V7],Value).
+
 
 % X is the postion of the highest element in the list L.
 getMaxMove(L, X) :- max_list(L, Y), nth1(X, L, Y),!.
 
 % X is the postion of the lowest element in the list L.
-getMinMove(L, X) :- min_list(L, Y), nth1(L, Y, X),!.
+getMinMove(L, X) :- min_list(L, Y), nth1(X, L, Y),!.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
