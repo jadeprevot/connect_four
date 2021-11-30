@@ -216,7 +216,7 @@ getDiagDownHelper(Board, (CurrX, CurrY), [H|T]) :-  CurrX < 8, CurrY < 7,
 % get the DiagUp from position at Move from Board
 getDiagUp(Board, (X, Y), Out) :- getDownLeftStartingPos((X,Y),(StartX,StartY)), getDiagUpHelper(Board, (StartX,StartY), Out).
 
-getDownLeftStartingPos((X,Y),(StartX,StartY)) :- is(X1,-X + 7), Y > X1, is(StartX, 6 - X1 + 1), is(StartY, 6).
+getDownLeftStartingPos((X,Y),(StartX,StartY)) :- is(X1,-X + 7), Y > X1, is(StartX, X-6+Y), is(StartY, 6).
 getDownLeftStartingPos((X,Y),(StartX,StartY)) :- is(X1,-X + 7), Y < X1, is(StartX, 1), is(StartY, Y + X - 1).
 getDownLeftStartingPos((X,Y),(StartX,StartY)) :- is(X1,-X + 7), is(Y, X1), StartX = 1, StartY = 6.
 
@@ -287,18 +287,13 @@ calcScore(Board,Col,Player,Score):-getDropXY(Board,Col,(X,Y)),calcScore(Board,X,
 calcScore(Board,X,Y,Player,Score):-getRow(Board,(X,Y),Row),countLineScore(Row,X,Score1,Player),
 			           getCol(Board,(X,Y),Col),countLineScore(Col,Y,Score2,Player),
 				   posDiagDown(X,Y,I1),getDiagDown(Board,(X,Y),DiagDown),countLineScore(DiagDown,I1,Score3,Player),
-				   posDiagUp(X,Y,I2),calcPosBug(X,Y,X2,Y2),getDiagUp(Board,(X2,Y2),DiagUp),countLineScore(DiagUp,I2,Score4,Player),
+				   posDiagUp(X,Y,I2),getDiagUp(Board,(X,Y),DiagUp),countLineScore(DiagUp,I2,Score4,Player),
 				   Score is Score1+Score2+Score3+Score4.
 
 %I est la position dans la diagonale du point de coordonn�es X Y
 posDiagDown(X,Y,I):-I is min(X,Y).
 posDiagUp(X,Y,I):-I is min(7-Y,X).
 
-% La clause deja implement� pour avoir les digonale montante ne marche
-% pas toujours, cette clause calcule une nouvelle paire de coordonn�es
-% qui marchent.
-calcPosBug(X,Y,X,Y):-(X-(6-Y))<1.
-calcPosBug(X,Y,X2,6):-X2 is X-(6-Y).
 
 % Pour un ligne et une position, Score est le nombre d'element Player
 % dans les 3 positions precedentes et 3 positions suivantes
