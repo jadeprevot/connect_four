@@ -43,15 +43,15 @@ playAIvsAI :- getBlankBoard(Board), nextPlayAIvsAI(Board, 1).
 nextPlayAIvsAI(Board, 1) :- getAIlocDepth0Move(Board, Move),
 					  %nl,write('Yellow dropped piece into column '),write(Move),nl,nl,
 					  getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
-					  drawBoard(NewBoard),
+					  %drawBoard(NewBoard),
 
 					  nextStateAI(NewBoard, NewPlayer, OutDropXY).
 
-nextPlayAIvsAI(Board, 2) :-getAIdynDepth0Move(Board, Move),
+nextPlayAIvsAI(Board, 2) :-getAI3Move(Board, Move),
 					  %nl,write('Red dropped piece into column '),write(Move),nl,nl,
 
 					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
-					  drawBoard(NewBoard),
+					  %drawBoard(NewBoard),
 
 					  nextStateAI(NewBoard, NewPlayer, OutDropXY).
 
@@ -62,9 +62,9 @@ nextStateAI(Board, NewPlayer,_) :- nextPlayAIvsAI(Board, NewPlayer).
 
 
 
-getAIDepth0Move(Board, Move) :- minMax(Board,1,false,2,Move,_).
-getAIlocDepth0Move(Board, Move) :- minMax(Board,0,true,2,Move,_).
-getAIdynDepth0Move(Board, Move) :- minMax2(Board,0,true,2,Move,_).
+%getAIDepth0Move(Board, Move) :- minMax(Board,1,false,2,Move,_).
+getAIlocDepth0Move(Board, Move) :- minMax(Board,4,false,1,Move,_).
+%getAIdynDepth0Move(Board, Move) :- minMax2(Board,0,true,2,Move).
 
 
 % play the game vs an AI ---------
@@ -308,11 +308,14 @@ countLineScore([_|R],PosX,CurrentX,Score,Player,Taille):-is(NextX, CurrentX+1),c
 % Weighted board
 weight([[3,4,5,7,5,4,3],[4,6,8,10,8,6,4],[5,8,11,13,11,8,5],[5,8,11,13,11,8,5],[4,6,8,10,8,6,4],[3,4,5,7,5,4,3]]).
 
+heuristic2(Board,Col,Player,false,-50001):- \+ isIllegal(Board,Col),wouldWin(Board, Col, Player).
+heuristic2(Board,Col,Player,false,-50000):- \+ isIllegal(Board,Col),inversionPlayer(Player,NotPlayer),wouldWin(Board, Col, NotPlayer).
+heuristic2(Board,Col,Player,true,50001):- \+ isIllegal(Board,Col),wouldWin(Board, Col, Player).
+heuristic2(Board,Col,Player,true,50000):- \+ isIllegal(Board,Col),inversionPlayer(Player,NotPlayer),wouldWin(Board, Col, NotPlayer).
+heuristic2(Board,Col,Player,_,Score):- \+ isIllegal(Board,Col),dropToken(Board,Player,Col,NewBoard),boardScoreWeights(NewBoard,1,1,Score,Player).
+heuristic2(_,_,_,true,-50003).
+heuristic2(_,_,_,false,50003).
 
-heuristic2(Board,Col,Player,50001):- \+ isIllegal(Board,Col),wouldWin(Board, Col, Player).
-heuristic2(Board,Col,Player,50000):- \+ isIllegal(Board,Col),inversionPlayer(Player,NotPlayer),wouldWin(Board, Col, NotPlayer).
-heuristic2(Board,Col,Player,Score):- \+ isIllegal(Board,Col),dropToken(Board,Player,Col,NewBoard),boardScoreWeights(NewBoard,1,1,Score,Player).
-heuristic2(_,_,_,-50003).
 
 
 % Pour chaque position, si le jeton apartient a Player, on ajoute le
@@ -346,60 +349,35 @@ boardScoreWeights([[_|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|
 
 getNextMovesScore(_,_,_,_,8,[]).
 
-getNextMovesScore(Node,Depth1,true,Player,Ind, [V|L]) :-
-	\+ isIllegal(Node,Ind),
-	Ind1 is Ind + 1,
-	getNextMovesScore(Node,Depth1,true,Player,Ind1, L),
-	getNextState(Node,Player,Ind,NewNode1,NewPlayer1,_),
-	minMax(NewNode1,Depth1,false,NewPlayer1,_,V),
-	!.
-getNextMovesScore(Node,Depth1,true,Player,Ind, [V|L]) :-
-	Ind1 is Ind + 1,
-	getNextMovesScore(Node,Depth1,true,Player,Ind1, L),
-        V is -99999,
-	!.
-getNextMovesScore(Node,Depth1,false,Player,Ind, [V|L]) :-
-	\+ isIllegal(Node,Ind),
-	Ind1 is Ind + 1,
-	getNextMovesScore(Node,Depth1,false,Player,Ind1, L),
-	getNextState(Node,Player,Ind,NewNode1,NewPlayer1,_),
-	minMax(NewNode1,Depth1,true,NewPlayer1,_,V),
-	!.
-getNextMovesScore(Node,Depth1,false,Player,Ind, [V|L]) :-
-	Ind1 is Ind + 1,
-	getNextMovesScore(Node,Depth1,false,Player,Ind1, L),
-        V is 99999,
-	!.
+getNextMovesScore(Node,Depth1,true,Player,Ind, [V|L]):- \+ isIllegal(Node,Ind), Ind1 is Ind + 1, wouldWin(Node,Ind,Player),V is 99999,
+	getNextMovesScore(Node,Depth1,true,Player,Ind1, L),!.
 
-minMax(Node,0,true,Player,Col,Value):-
-    heuristic2(Node,1,Player,V1),
-    heuristic2(Node,2,Player,V2),
-    heuristic2(Node,3,Player,V3),
-    heuristic2(Node,4,Player,V4),
-    heuristic2(Node,5,Player,V5),
-    heuristic2(Node,6,Player,V6),
-    heuristic2(Node,7,Player,V7),
+getNextMovesScore(Node,Depth1,true,Player,Ind, [V|L]) :-
+	\+ isIllegal(Node,Ind),Ind1 is Ind + 1,getNextMovesScore(Node,Depth1,true,Player,Ind1, L),
+	getNextState(Node,Player,Ind,NewNode1,NewPlayer1,_),minMax(NewNode1,Depth1,false,NewPlayer1,_,V),!.
+getNextMovesScore(Node,Depth1,true,Player,Ind, [V|L]) :-Ind1 is Ind + 1,getNextMovesScore(Node,Depth1,true,Player,Ind1, L),V is -99999,!.
+
+getNextMovesScore(Node,Depth1,false,Player,Ind, [V|L]):- \+ isIllegal(Node,Ind), Ind1 is Ind + 1, wouldWin(Node,Ind,Player),V is -99999,
+	getNextMovesScore(Node,Depth1,false,Player,Ind1, L),!.
+
+getNextMovesScore(Node,Depth1,false,Player,Ind, [V|L]) :-
+	\+ isIllegal(Node,Ind),Ind1 is Ind + 1,getNextMovesScore(Node,Depth1,false,Player,Ind1, L),
+	getNextState(Node,Player,Ind,NewNode1,NewPlayer1,_),minMax(NewNode1,Depth1,true,NewPlayer1,_,V),!.
+getNextMovesScore(Node,Depth1,false,Player,Ind, [V|L]) :- Ind1 is Ind + 1,getNextMovesScore(Node,Depth1,false,Player,Ind1, L),V is 99999,!.
+
+minMax(Node,1,true,Player,Col,Value):-
+    heuristic2(Node,1,Player,true,V1),heuristic2(Node,2,Player,true,V2),heuristic2(Node,3,Player,true,V3),heuristic2(Node,4,Player,true,V4),
+    heuristic2(Node,5,Player,true,V5),heuristic2(Node,6,Player,true,V6),heuristic2(Node,7,Player,true,V7),
     getMaxMove([V1,V2,V3,V4,V5,V6,V7],Col,Value),!.
 
-minMax(Node,0,false,Player, Col, Value):-
-    heuristic2(Node,1,Player,V1),
-    heuristic2(Node,2,Player,V2),
-    heuristic2(Node,3,Player,V3),
-    heuristic2(Node,4,Player,V4),
-    heuristic2(Node,5,Player,V5),
-    heuristic2(Node,6,Player,V6),
-    heuristic2(Node,7,Player,V7),
+minMax(Node,1,false,Player, Col, Value):-
+    heuristic2(Node,1,Player,false,V1),heuristic2(Node,2,Player,false,V2),heuristic2(Node,3,Player,false,V3),heuristic2(Node,4,Player,false,V4),
+    heuristic2(Node,5,Player,false,V5),heuristic2(Node,6,Player,false,V6),heuristic2(Node,7,Player,false,V7),
     getMinMove([V1,V2,V3,V4,V5,V6,V7],Col,Value),!.
 
-minMax(Node,Depth,true,Player,Col,Value):-
-    Depth1 is Depth - 1,
-    getNextMovesScore(Node,Depth1,true,Player,1,L),
-    getMaxMove(L,Col,Value).
+minMax(Node,Depth,true,Player,Col,Value):- Depth1 is Depth - 1,getNextMovesScore(Node,Depth1,true,Player,1,L),getMaxMove(L,Col,Value).
 
-minMax(Node,Depth,false,Player,Col,Value):-
-    Depth1 is Depth - 1,
-    getNextMovesScore(Node,Depth1,false,Player,1,L),
-    getMinMove(L,Col,Value).
+minMax(Node,Depth,false,Player,Col,Value):- Depth1 is Depth - 1,getNextMovesScore(Node,Depth1,false,Player,1,L),getMinMove(L,Col,Value).
 
 % X is the postion of the highest element in the list L.
 getMaxMove(L, Col, Y) :- max_list(L, Y), findall(N,nth1(N,L,Y),C),random_member(Col,C),!.
