@@ -28,7 +28,7 @@ nextStateAI(Board, NewPlayer,_) :- nextPlayAIvsAI(Board, NewPlayer).
 
 
 
-getAIDepth0Move(Board, Move) :- minMax(Board,1,true,2,Move).
+getAIDepth0Move(Board, Move) :- minMax(Board,1,false,2,Move,_).
 
 % play the game vs an AI ---------
 
@@ -226,7 +226,7 @@ drawBoardRow([]).
 drawBoardRow([2|T]) :- ansi_format([bold,fg(red)], 'O ~w', [' ']), drawBoardRow(T).
 drawBoardRow([1|T]) :- ansi_format([bold,fg(yellow)], 'O ~w', [' ']), drawBoardRow(T).
 drawBoardRow([0|T]) :- ansi_format([bold,fg(black)], 'O ~w', [' ']), drawBoardRow(T).
-drawBoard(Board) :- ansi_format([bold,fg(black)], '1   2   3   4   5   6   7 ~w', [' ']),nl,nl, drawBoard1(Board).
+drawBoard(Board) :- ansi_format([bold,fg(black)], '1  2  3  4  5  6  7 ~w', [' ']),nl,nl, drawBoard1(Board).
 
 drawBlankBoard :- getBlankBoard(Board), drawBoard(Board).
 endmessage :- write('Enter \'play.\' to play a 2 player game or \'playAI[1-3].\' to play against the computer.').
@@ -295,37 +295,50 @@ boardScoreWeights([[_|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|
 
 
 % isDepthLimit(D, Node, true) :-
-% 	D is 0.
+%	D is 0.
 % isDepthLimit(D, Node, true) :-
 
 % isDepthLimit(D, Node, false) :-
 
 
 % minMax(Node, Depth, Max, Player, Value, 7) :-
-% 	heuristic2(Node,7,Player,V1),
-% 	getMaxMove([V1,V2,V3,V4,V5,V6,V7],Value),!.
+%	heuristic2(Node,7,Player,V1),
+%	getMaxMove([V1,V2,V3,V4,V5,V6,V7],Value),!.
 
 % minMax(Node, Depth, Max, Player, Value, It) :-
-% 	heuristic2(Node, It, Player, V1),
-% 	getMaxMove([V1,V2,V3,V4,V5,V6,V7],Value),!.
-% 	It1 is It + 1,
-% 	minMax(Node, Depth, Max, Player, Value, It1).
+%	heuristic2(Node, It, Player, V1),
+%	getMaxMove([V1,V2,V3,V4,V5,V6,V7],Value),!.
+%	It1 is It + 1,
+%	minMax(Node, Depth, Max, Player, Value, It1).
 
-getNextMovesScore(Node,Depth1,B,Player,0,[]).
+getNextMovesScore(_,_,_,_,8,[]).
 
 getNextMovesScore(Node,Depth1,true,Player,Ind, [V|L]) :-
-	Ind1 is Ind - 1,
+	\+ isIllegal(Node,Ind),
+	Ind1 is Ind + 1,
+	getNextMovesScore(Node,Depth1,true,Player,Ind1, L),
 	getNextState(Node,Player,Ind,NewNode1,NewPlayer1,_),
-	minMax(NewNode1,Depth1,false,NewPlayer1,V),
-	getNextMovesScore(Node,Depth1,true,Player,Ind1, L).
-
+	minMax(NewNode1,Depth1,false,NewPlayer1,_,V),
+	!.
+getNextMovesScore(Node,Depth1,true,Player,Ind, [V|L]) :-
+	Ind1 is Ind + 1,
+	getNextMovesScore(Node,Depth1,true,Player,Ind1, L),
+        V is -99999,
+	!.
 getNextMovesScore(Node,Depth1,false,Player,Ind, [V|L]) :-
-	Ind1 is Ind - 1,
+	\+ isIllegal(Node,Ind),
+	Ind1 is Ind + 1,
+	getNextMovesScore(Node,Depth1,false,Player,Ind1, L),
 	getNextState(Node,Player,Ind,NewNode1,NewPlayer1,_),
-	minMax(NewNode1,Depth1,true,NewPlayer1,V),
-	getNextMovesScore(Node,Depth1,false,Player,Ind1, L).
+	minMax(NewNode1,Depth1,true,NewPlayer1,_,V),
+	!.
+getNextMovesScore(Node,Depth1,false,Player,Ind, [V|L]) :-
+	Ind1 is Ind + 1,
+	getNextMovesScore(Node,Depth1,false,Player,Ind1, L),
+        V is 99999,
+	!.
 
-minMax(Node,0,true,Player,Value):-
+minMax(Node,0,true,Player,Col,Value):-
     heuristic2(Node,1,Player,V1),
     heuristic2(Node,2,Player,V2),
     heuristic2(Node,3,Player,V3),
@@ -333,9 +346,9 @@ minMax(Node,0,true,Player,Value):-
     heuristic2(Node,5,Player,V5),
     heuristic2(Node,6,Player,V6),
     heuristic2(Node,7,Player,V7),
-    getMaxMove([V1,V2,V3,V4,V5,V6,V7],Value),!.
+    getMaxMove([V1,V2,V3,V4,V5,V6,V7],Col,Value),!.
 
-minMax(Node,0,false,Player,Value):-
+minMax(Node,0,false,Player, Col, Value):-
     heuristic2(Node,1,Player,V1),
     heuristic2(Node,2,Player,V2),
     heuristic2(Node,3,Player,V3),
@@ -343,37 +356,23 @@ minMax(Node,0,false,Player,Value):-
     heuristic2(Node,5,Player,V5),
     heuristic2(Node,6,Player,V6),
     heuristic2(Node,7,Player,V7),
-    getMinMove([V1,V2,V3,V4,V5,V6,V7],Value),!.
+    getMinMove([V1,V2,V3,V4,V5,V6,V7],Col,Value),!.
 
-minMax(Node,Depth,B,Player,CValue):-
-	Depth1 is Depth - 1,
-    %getNextState(Node,Player,1,NewNode1,NewPlayer1,_), minMax(NewNode1,Depth1,false,NewPlayer1,V1),
-    %getNextState(Node,Player,2,NewNode2,NewPlayer2,_), minMax(NewNode2,Depth1,false,NewPlayer2,V2),
-    %getNextState(Node,Player,3,NewNode3,NewPlayer3,_), minMax(NewNode3,Depth1,false,NewPlayer3,V3),
-    %getNextState(Node,Player,4,NewNode4,NewPlayer4,_), minMax(NewNode4,Depth1,false,NewPlayer4,V4),
-    %getNextState(Node,Player,5,NewNode5,NewPlayer5,_), minMax(NewNode5,Depth1,false,NewPlayer5,V5),
-    %getNextState(Node,Player,6,NewNode6,NewPlayer6,_), minMax(NewNode6,Depth1,false,NewPlayer6,V6),
-    %getNextState(Node,Player,7,NewNode7,NewPlayer7,_), minMax(NewNode7,Depth1,false,NewPlayer7,V7),
-	getNextMovesScore(Node,Depth1,B,Player,7,L),
-    getMaxMove(L,Value).
+minMax(Node,Depth,true,Player,Col,Value):-
+    Depth1 is Depth - 1,
+    getNextMovesScore(Node,Depth1,true,Player,1,L),
+    getMaxMove(L,Col,Value).
 
-%minMax(Node,Depth,false,Player,Value):-
-%	Depth1 is Depth - 1,
-%    getNextState(Node,Player,1,NewNode1,NewPlayer1,_), minMax(NewNode1,Depth1,true,NewPlayer1,V1),
-%    getNextState(Node,Player,2,NewNode2,NewPlayer2,_), minMax(NewNode2,Depth1,true,NewPlayer2,V2),
-%    getNextState(Node,Player,3,NewNode3,NewPlayer3,_), minMax(NewNode3,Depth1,true,NewPlayer3,V3),
-%    getNextState(Node,Player,4,NewNode4,NewPlayer4,_), minMax(NewNode4,Depth1,true,NewPlayer4,V4),
-%    getNextState(Node,Player,5,NewNode5,NewPlayer5,_), minMax(NewNode5,Depth1,true,NewPlayer5,V5),
-%    getNextState(Node,Player,6,NewNode6,NewPlayer6,_), minMax(NewNode6,Depth1,true,NewPlayer6,V6),
-%    getNextState(Node,Player,7,NewNode7,NewPlayer7,_), minMax(NewNode7,Depth1,true,NewPlayer7,V7),
-%    getMinMove([V1,V2,V3,V4,V5,V6,V7],Value).
-
+minMax(Node,Depth,false,Player,Col,Value):-
+    Depth1 is Depth - 1,
+    getNextMovesScore(Node,Depth1,false,Player,1,L),
+    getMinMove(L,Col,Value).
 
 % X is the postion of the highest element in the list L.
-getMaxMove(L, Y) :- max_list(L, Y),!.%, nth1(Col, L, Y),!.
+getMaxMove(L, Col, Y) :- max_list(L, Y), findall(N,nth1(N,L,Y),C),random_member(Col,C),!.
 
 % X is the postion of the lowest element in the list L.
-getMinMove(L, Y) :- min_list(L, Y),!.%, nth1(Col, L, Y),!.
+getMinMove(L, Col, Y) :- min_list(L, Y), findall(N,nth1(N,L,Y),C),random_member(Col,C),!.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
