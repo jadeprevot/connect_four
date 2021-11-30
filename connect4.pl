@@ -63,8 +63,8 @@ nextStateAI(Board, NewPlayer,_) :- nextPlayAIvsAI(Board, NewPlayer).
 
 
 getAIDepth0Move(Board, Move) :- minMax(Board,1,false,2,Move,_).
-getAIlocDepth0Move(Board, Move) :- minMax(Board,0,true,2,Move).
-getAIdynDepth0Move(Board, Move) :- minMax2(Board,0,true,2,Move).
+getAIlocDepth0Move(Board, Move) :- minMax(Board,0,true,2,Move,_).
+getAIdynDepth0Move(Board, Move) :- minMax2(Board,0,true,2,Move,_).
 
 
 % play the game vs an AI ---------
