@@ -3,32 +3,69 @@
 % Enter 'play.' to play the 2-player game.
 % Enter 'playAI1.' to play the game versus the level 1 computer.
 
+% Loop to measure heuristics ----------------------
+
+to_100_matchs(100,V,V2) :- foocounter(V),foocounter2(V2),nl.
+to_100_matchs(X,V,V2) :-
+   playAIvsAI,
+   Y is X + 1,
+   to_100_matchs(Y,V,V2).
+
+:- dynamic foocounter/1.
+
+initfoo :-
+    retractall(foocounter(_)),
+    assertz(foocounter(0)).
+
+incrfoo :-
+    foocounter(V0),
+    retractall(foocounter(_)),
+    succ(V0, V),
+    assertz(foocounter(V)).
+
+:- dynamic foocounter2/1.
+
+initfoo2 :-
+    retractall(foocounter2(_)),
+    assertz(foocounter2(0)).
+
+incrfoo2 :-
+    foocounter2(V0),
+    retractall(foocounter2(_)),
+    succ(V0, V),
+    assertz(foocounter2(V)).
+
+
+
 % make two AIs play together ----------------------
 playAIvsAI :- getBlankBoard(Board), nextPlayAIvsAI(Board, 1).
 
-nextPlayAIvsAI(Board, 1) :- getAI3Move(Board, Move),
-					  nl,write('Yellow dropped piece into column '),write(Move),nl,nl,
+nextPlayAIvsAI(Board, 1) :- getAIlocDepth0Move(Board, Move),
+					  %nl,write('Yellow dropped piece into column '),write(Move),nl,nl,
 					  getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
 					  drawBoard(NewBoard),
 
 					  nextStateAI(NewBoard, NewPlayer, OutDropXY).
 
-nextPlayAIvsAI(Board, 2) :-getAIDepth0Move(Board, Move),
-					  nl,write('Red dropped piece into column '),write(Move),nl,nl,
+nextPlayAIvsAI(Board, 2) :-getAIdynDepth0Move(Board, Move),
+					  %nl,write('Red dropped piece into column '),write(Move),nl,nl,
 
 					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
 					  drawBoard(NewBoard),
 
 					  nextStateAI(NewBoard, NewPlayer, OutDropXY).
 
-nextStateAI(Board, 2, DropXY) :- win(Board, 1, DropXY),nl, write('Yellow wins!'),nl, endmessage.
-nextStateAI(Board, 1, DropXY) :- win(Board, 2, DropXY),nl, write('Red wins!'),nl, endmessage.
+nextStateAI(Board, 2, DropXY) :- win(Board, 1, DropXY),nl, write('Yellow wins!'),incrfoo,nl, endmessage.
+nextStateAI(Board, 1, DropXY) :- win(Board, 2, DropXY),nl, write('Red wins!'),incrfoo2,nl, endmessage.
 nextStateAI(Board,_,_) :- isFull(Board),nl, write('It\'s a tie!'),nl, endmessage.
 nextStateAI(Board, NewPlayer,_) :- nextPlayAIvsAI(Board, NewPlayer).
 
 
 
 getAIDepth0Move(Board, Move) :- minMax(Board,1,false,2,Move,_).
+getAIlocDepth0Move(Board, Move) :- minMax(Board,0,true,2,Move).
+getAIdynDepth0Move(Board, Move) :- minMax2(Board,0,true,2,Move).
+
 
 % play the game vs an AI ---------
 
@@ -42,7 +79,7 @@ nextPlayvsAI(Board, 1) :- nl,write('It is your turn.'),nl,nl,
 
 nextPlayvsAI(Board, 2) :- nl,write('Computer is making move...'),nl,nl,
 					  drawBoard(Board),
-					  getAIDepth0Move(Board, Move),
+					  getAIlocDepth0Move(Board, Move),
 					  nl,write('Computer dropped piece into column '),write(Move),nl,nl,
 					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
 					  nextStateAI2(NewBoard, NewPlayer, OutDropXY).
@@ -52,6 +89,7 @@ nextStateAI2(Board, 1, DropXY) :- win(Board, 2, DropXY),nl, write('The computer 
 nextStateAI2(Board,_,_) :- isFull(Board),nl, write('It\'s a tie!'),nl, endmessage.
 nextStateAI2(Board, NewPlayer,_) :- nextPlayvsAI(Board, NewPlayer).
 
+getAI1Move(_, Move) :- random_between(1,7, Move).
 getAI2Move(Board, 1) :- \+ isIllegal(Board, 1).
 getAI2Move(Board, 2) :- \+ isIllegal(Board, 2).
 getAI2Move(Board, 3) :- \+ isIllegal(Board, 3).
