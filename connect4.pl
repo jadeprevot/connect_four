@@ -305,7 +305,35 @@ countLineScore([F|R],PosX,CurrentX,Score,Player,Taille):- PosX-CurrentX<4, F==Pl
 countLineScore([_|R],PosX,CurrentX,Score,Player,Taille):-is(NextX, CurrentX+1),countLineScore(R,PosX,NextX,Score,Player,Taille).
 
 
+% Weighted board
+weight([[3,4,5,7,5,4,3],[4,6,8,10,8,6,4],[5,8,11,13,11,8,5],[5,8,11,13,11,8,5],[4,6,8,10,8,6,4],[3,4,5,7,5,4,3]]).
+
+
+heuristic2(Board,Col,Player,50001):- \+ isIllegal(Board,Col),wouldWin(Board, Col, Player).
+heuristic2(Board,Col,Player,50000):- \+ isIllegal(Board,Col),inversionPlayer(Player,NotPlayer),wouldWin(Board, Col, NotPlayer).
+heuristic2(Board,Col,Player,Score):- \+ isIllegal(Board,Col),dropToken(Board,Player,Col,NewBoard),boardScoreWeights(NewBoard,1,1,Score,Player).
+heuristic2(_,_,_,-50003).
+
+
+% Pour chaque position, si le jeton apartient a Player, on ajoute le
+% poids de la case au score
+% Si le jeton appartient a l'adversaire, on soustrait ce poids
+boardScoreWeights([],_,_,0,_).
+boardScoreWeights([[]|T],_,Y,Score,Player):- NewY is Y+1, boardScoreWeights(T,1,NewY,Score,Player).
+boardScoreWeights([[Player|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,NewScore,Player),
+                                                    weight(W),getElem(W,X,Y,1,1,Out),Score is NewScore+Out.
+boardScoreWeights([[0|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,Score,Player).
+boardScoreWeights([[_|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,NewScore,Player),
+                                                    weight(W),getElem(W,X,Y,1,1,Out),Score is NewScore-Out.
+													
+		
+		
 % Set-of-4 heuristic
+
+heuristic3(Board,Col,Player,50001):- \+ isIllegal(Board,Col),wouldWin(Board, Col, Player).
+heuristic3(Board,Col,Player,50000):- \+ isIllegal(Board,Col),inversionPlayer(Player,NotPlayer),wouldWin(Board, Col, NotPlayer).
+heuristic3(Board,Col,Player,Score):- \+ isIllegal(Board,Col),calcScore2(Board,Col,Player,Score).
+heuristic3(_,_,_,-50003).
 				
 % get value of a matrix	
 cellVal([], _, []).
@@ -334,7 +362,6 @@ countSubLineScore(_,EndX,CurrentX,0,_,_):- CurrentX is EndX+1.
 countSubLineScore([F|R],EndX,CurrentX,Score,Player,Taille):-(F==Player; F==0), is(NextX, CurrentX+1), countSubLineScore(R,EndX,NextX,NextScore,Player,Taille),Score is NextScore+1.
 countSubLineScore([F|_],_,_,-99,Player,_):- F\=Player, F\=0.
 
-	
 
 % If the score is negative, its 0, else, 1
 fixScore(In,0):-In<0.
@@ -342,28 +369,6 @@ fixScore(_,1).
 
 % end of set-4 heuristic
 
-
-
-% Weighted board
-weight([[3,4,5,7,5,4,3],[4,6,8,10,8,6,4],[5,8,11,13,11,8,5],[5,8,11,13,11,8,5],[4,6,8,10,8,6,4],[3,4,5,7,5,4,3]]).
-
-
-heuristic2(Board,Col,Player,50001):- \+ isIllegal(Board,Col),wouldWin(Board, Col, Player).
-heuristic2(Board,Col,Player,50000):- \+ isIllegal(Board,Col),inversionPlayer(Player,NotPlayer),wouldWin(Board, Col, NotPlayer).
-heuristic2(Board,Col,Player,Score):- \+ isIllegal(Board,Col),dropToken(Board,Player,Col,NewBoard),boardScoreWeights(NewBoard,1,1,Score,Player).
-heuristic2(_,_,_,-50003).
-
-
-% Pour chaque position, si le jeton apartient a Player, on ajoute le
-% poids de la case au score
-% Si le jeton appartient a l'adversaire, on soustrait ce poids
-boardScoreWeights([],_,_,0,_).
-boardScoreWeights([[]|T],_,Y,Score,Player):- NewY is Y+1, boardScoreWeights(T,1,NewY,Score,Player).
-boardScoreWeights([[Player|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,NewScore,Player),
-                                                    weight(W),getElem(W,X,Y,1,1,Out),Score is NewScore+Out.
-boardScoreWeights([[0|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,Score,Player).
-boardScoreWeights([[_|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,NewScore,Player),
-                                                    weight(W),getElem(W,X,Y,1,1,Out),Score is NewScore-Out.
 
 
 % isDepthLimit(D, Node, true) :-
