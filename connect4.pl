@@ -50,7 +50,7 @@ incrfoo2 :-
 playAIvsAI :- getBlankBoard(Board), nextPlayAIvsAI(Board, 1,0).
 
 
-nextPlayAIvsAI(Board, 1,Ind) :- getAIh2Move(Board, Move,1,2),
+nextPlayAIvsAI(Board, 1,Ind) :- getAIh3Move(Board, Move,1,1),
 					  %nl,write('Yellow dropped piece into column '),write(Move),nl,nl,
 					  getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
 					  %drawBoard(NewBoard),
@@ -58,7 +58,7 @@ nextPlayAIvsAI(Board, 1,Ind) :- getAIh2Move(Board, Move,1,2),
 					  nextStateAI(NewBoard, NewPlayer, OutDropXY, Ind1).
 
 
-nextPlayAIvsAI(Board, 2,Ind) :-getAIh1Move(Board, Move,2,1),
+nextPlayAIvsAI(Board, 2,Ind) :-getAIh1Move(Board, Move,2,3),
 					  %nl,write('Red dropped piece into column '),write(Move),nl,nl
 
 					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
@@ -79,6 +79,8 @@ getAIh2Move(Board, Move,P,Depth) :- 0 is mod(Depth,2),minMax(Board,Depth,false,P
 
 getAIh1Move(Board, Move,P,Depth) :- 1 is mod(Depth,2),minMax2(Board,Depth,true,P,Move,_).
 getAIh1Move(Board, Move,P,Depth) :- 0 is mod(Depth,2),minMax2(Board,Depth,false,P,Move,_).
+getAIh3Move(Board, Move,P,Depth) :- 1 is mod(Depth,2),minMax3(Board,Depth,true,P,Move,_).
+getAIh3Move(Board, Move,P,Depth) :- 0 is mod(Depth,2),minMax3(Board,Depth,false,P,Move,_).
 
 
 
@@ -299,7 +301,6 @@ heuristic1(Board,Col,Player,true,50000):- \+ isIllegal(Board,Col),inversionPlaye
 heuristic1(Board,Col,Player,_,Score):- \+ isIllegal(Board,Col),calcScore(Board,Col,Player,Score).
 heuristic1(_,_,_,true,-50003).
 heuristic1(_,_,_,false,50003).
-
 %
 % Return the Score when player plays in the col
 calcScore(Board,Col,Player,Score):-getDropXY(Board,Col,(X,Y)),calcScore(Board,X,Y,Player,Score).
@@ -347,23 +348,27 @@ boardScoreWeights([[Player|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeight
 boardScoreWeights([[0|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,Score,Player).
 boardScoreWeights([[_|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,NewScore,Player),
                                                     weight(W),getElem(W,X,Y,1,1,Out),Score is NewScore-Out.
-													
-		
-		
+
+
+
 % Set-of-4 heuristic
 
-heuristic3(Board,Col,Player,50001):- \+ isIllegal(Board,Col),wouldWin(Board, Col, Player).
-heuristic3(Board,Col,Player,50000):- \+ isIllegal(Board,Col),inversionPlayer(Player,NotPlayer),wouldWin(Board, Col, NotPlayer).
-heuristic3(Board,Col,Player,Score):- \+ isIllegal(Board,Col),calcScore2(Board,Col,Player,Score).
-heuristic3(_,_,_,-50003).
-				
-	
+
+heuristic3(Board,Col,Player,false,-50001):- \+ isIllegal(Board,Col),wouldWin(Board, Col, Player).
+heuristic3(Board,Col,Player,false,-50000):- \+ isIllegal(Board,Col),inversionPlayer(Player,NotPlayer),wouldWin(Board, Col, NotPlayer).
+heuristic3(Board,Col,Player,true,50001):- \+ isIllegal(Board,Col),wouldWin(Board, Col, Player).
+heuristic3(Board,Col,Player,true,50000):- \+ isIllegal(Board,Col),inversionPlayer(Player,NotPlayer),wouldWin(Board, Col, NotPlayer).
+heuristic3(Board,Col,Player,_,Score):- \+ isIllegal(Board,Col),calcScore2(Board,Col,Player,Score).
+heuristic3(_,_,_,true,-50003).
+heuristic3(_,_,_,false,50003).
+
+
 % Return the Score when player plays in the col
 calcScore2(Board,Col,Player,Score):-getDropXY(Board,Col,(X,Y)),calcScore2(Board,X,Y,Player,Score).
 calcScore2(Board,X,Y,Player,Score):-getRow(Board,(X,Y),Row),countLineScore2(Row,X,Score1,Player),
 			   getCol(Board,(X,Y),Col),countLineScore2(Col,Y,Score2,Player),
 		    posDiagDown(X,Y,I1),getDiagDown(Board,(X,Y),DiagDown),countLineScore2(DiagDown,I1,Score3,Player),
-		    posDiagUp(X,Y,I2),calcPosBug(X,Y,X2,Y2),getDiagUp(Board,(X2,Y2),DiagUp),countLineScore2(DiagUp,I2,Score4,Player),
+		    posDiagUp(X,Y,I2),getDiagUp(Board,(X,Y),DiagUp),countLineScore2(DiagUp,I2,Score4,Player),
 		    Score is Score1+Score2+Score3+Score4.
 
 %(On calcule le score autour de la position initiale, en mettant à 0 si un pion ennemi est sur notre ligne si non, 1)
@@ -371,8 +376,8 @@ countLineScore2(L,PosX,Score,Player):-length(L,Taille),countLineScore2(L,PosX,1,
 countLineScore2(_,PosX,CurrentX,0,_,_):- CurrentX is PosX+1.
 countLineScore2([F|R],PosX,CurrentX,Score,Player,Taille):- PosX-CurrentX<4, is(NextX, CurrentX+1), is(EndX, CurrentX+3), EndX<Taille+1, countSubLineScore([F|R],EndX,CurrentX,SubScore,Player,Taille) , fixScore(SubScore,FixSubScore), countLineScore2(R,PosX,NextX,NextScore,Player,Taille), Score is FixSubScore+NextScore.
 countLineScore2([_|R],PosX,CurrentX,Score,Player,Taille):-is(NextX, CurrentX+1),countLineScore2(R,PosX,NextX,Score,Player,Taille).
-	
-	
+
+
 countSubLineScore(_,_,CurrentX,0,_,Taille):-CurrentX is Taille+1.
 countSubLineScore(_,EndX,CurrentX,0,_,_):- CurrentX is EndX+1.
 countSubLineScore([F|R],EndX,CurrentX,Score,Player,Taille):-(F==Player; F==0), is(NextX, CurrentX+1), countSubLineScore(R,EndX,NextX,NextScore,Player,Taille),Score is NextScore+1.
