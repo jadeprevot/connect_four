@@ -16,6 +16,7 @@ to_100_matchs(0,V,V2) :-
 
 to_100_matchs(X,V,V2) :-
    playAIvsAI,
+
    Y is X + 1,
    to_100_matchs(Y,V,V2).
 
@@ -46,27 +47,42 @@ incrfoo2 :-
 
 
 % make two AIs play together ----------------------
-playAIvsAI :- getBlankBoard(Board), nextPlayAIvsAI(Board, 1).
+playAIvsAI :- getBlankBoard(Board), nextPlayAIvsAI(Board, 1,0).
 
-nextPlayAIvsAI(Board, 1) :- getAIdynMove(Board, Move,1,3),
+nextPlayAIvsAI(Board, 1,Ind) :- Ind < 4,getAIdynMove(Board, Move,1,1),
 					  %nl,write('Yellow dropped piece into column '),write(Move),nl,nl,
 					  getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
 					  %drawBoard(NewBoard),
+                                          Ind1 is Ind + 1,
+					  nextStateAI(NewBoard, NewPlayer, OutDropXY, Ind1).
 
-					  nextStateAI(NewBoard, NewPlayer, OutDropXY).
+nextPlayAIvsAI(Board, 1,Ind) :- Ind < 8,Ind < 3,getAIdynMove(Board, Move,1,2),
+					  %nl,write('Yellow dropped piece into column '),write(Move),nl,nl,
+					  getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
+					  %drawBoard(NewBoard),
+                                          Ind1 is Ind + 1,
+					  nextStateAI(NewBoard, NewPlayer, OutDropXY, Ind1).
 
-nextPlayAIvsAI(Board, 2) :-getAI3Move(Board, Move),
+nextPlayAIvsAI(Board, 1,Ind) :- getAIdynMove(Board, Move,1,4),
+					  %nl,write('Yellow dropped piece into column '),write(Move),nl,nl,
+					  getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
+					  %drawBoard(NewBoard),
+                                          Ind1 is Ind + 1,
+					  nextStateAI(NewBoard, NewPlayer, OutDropXY, Ind1).
+
+
+nextPlayAIvsAI(Board, 2,Ind) :-getAI1Move(Board, Move),
 					  %nl,write('Red dropped piece into column '),write(Move),nl,nl
 
 					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
 					  %drawBoard(NewBoard),
+                                          Ind1 is Ind + 1,
+					  nextStateAI(NewBoard, NewPlayer, OutDropXY,Ind1).
 
-					  nextStateAI(NewBoard, NewPlayer, OutDropXY).
-
-nextStateAI(Board, 2, DropXY) :- win(Board, 1, DropXY),nl, write('Yellow wins!'),incrfoo,nl, endmessage.
-nextStateAI(Board, 1, DropXY) :- win(Board, 2, DropXY),nl, write('Red wins!'),incrfoo2,nl, endmessage.
-nextStateAI(Board,_,_) :- isFull(Board),nl, write('It\'s a tie!'),nl, endmessage.
-nextStateAI(Board, NewPlayer,_) :- nextPlayAIvsAI(Board, NewPlayer).
+nextStateAI(Board, 2, DropXY,_) :- win(Board, 1, DropXY),nl, write('Yellow wins!'),incrfoo,nl, endmessage.
+nextStateAI(Board, 1, DropXY,_) :- win(Board, 2, DropXY),nl, write('Red wins!'),incrfoo2,nl, endmessage.
+nextStateAI(Board,_,_,_) :- isFull(Board),nl, write('It\'s a tie!'),nl, endmessage.
+nextStateAI(Board, NewPlayer,_,Ind) :- nextPlayAIvsAI(Board, NewPlayer,Ind).
 
 
 
