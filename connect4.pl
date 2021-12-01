@@ -1,7 +1,12 @@
 %Connect Four
-% CS 312 Project
-% Enter 'play.' to play the 2-player game.
-% Enter 'playAI1.' to play the game versus the level 1 computer.
+% 4IF Project
+% Enter 'playAIvsAI.' to watch an AI match.
+% Enter 'playvsAI.' to play the game versus the computer.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Code par H4114
+%
+
 
 % Loop to measure heuristics ----------------------
 
@@ -50,35 +55,42 @@ incrfoo2 :-
 playAIvsAI :- getBlankBoard(Board), nextPlayAIvsAI(Board, 1,0).
 
 
-nextPlayAIvsAI(Board, 1,Ind) :- getAIh3Move(Board, Move,1,2),
+nextPlayAIvsAI(Board, 1,Ind) :- getAIh2Move(Board, Move,1,0),
 					  %nl,write('Yellow dropped piece into column '),write(Move),nl,nl,
 					  getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
-					  %drawBoard(NewBoard),
+					  drawBoard(NewBoard),
                                           Ind1 is Ind + 1,
 					  nextStateAI(NewBoard, NewPlayer, OutDropXY, Ind1).
 
 
-nextPlayAIvsAI(Board, 2,Ind) :-getAIh3Move(Board, Move,2,3),
+nextPlayAIvsAI(Board, 2,Ind) :-getAIh1Move(Board, Move,2,0),
 					  %nl,write('Red dropped piece into column '),write(Move),nl,nl
 
 					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
-					  %drawBoard(NewBoard),
+					  drawBoard(NewBoard),
                                           Ind1 is Ind + 1,
 					  nextStateAI(NewBoard, NewPlayer, OutDropXY,Ind1).
 
-nextStateAI(Board, 2, DropXY,_) :- win(Board, 1, DropXY),nl, write('Yellow wins!'),incrfoo,nl, endmessage.
-nextStateAI(Board, 1, DropXY,_) :- win(Board, 2, DropXY),nl, write('Red wins!'),incrfoo2,nl, endmessage.
+nextStateAI(Board, 2, DropXY,_) :-
+   win(Board, 1, DropXY),nl, write('Yellow wins!'),
+   %incrfoo,
+   nl,endmessage.
+nextStateAI(Board, 1, DropXY,_) :-
+   win(Board, 2, DropXY),nl, write('Red wins!'),
+   %incrfoo2,
+   nl, endmessage.
 nextStateAI(Board,_,_,_) :- isFull(Board),nl, write('It\'s a tie!'),nl, endmessage.
 nextStateAI(Board, NewPlayer,_,Ind) :- nextPlayAIvsAI(Board, NewPlayer,Ind).
 
 
 
-%getAIDepth0Move(Board, Move) :- minMax(Board,1,false,2,Move,_).
+% AIs moves -----------------------------
 getAIh2Move(Board, Move,P,Depth) :- 1 is mod(Depth,2),minMax2(Board,Depth,true,P,Move,_).
 getAIh2Move(Board, Move,P,Depth) :- 0 is mod(Depth,2),minMax2(Board,Depth,false,P,Move,_).
 
 getAIh1Move(Board, Move,P,Depth) :- 1 is mod(Depth,2),minMax1(Board,Depth,true,P,Move,_).
 getAIh1Move(Board, Move,P,Depth) :- 0 is mod(Depth,2),minMax1(Board,Depth,false,P,Move,_).
+
 getAIh3Move(Board, Move,P,Depth) :- 1 is mod(Depth,2),minMax3(Board,Depth,true,P,Move,_).
 getAIh3Move(Board, Move,P,Depth) :- 0 is mod(Depth,2),minMax3(Board,Depth,false,P,Move,_).
 
@@ -106,138 +118,8 @@ nextStateAI2(Board, 1, DropXY) :- win(Board, 2, DropXY),nl, write('The computer 
 nextStateAI2(Board,_,_) :- isFull(Board),nl, write('It\'s a tie!'),nl, endmessage.
 nextStateAI2(Board, NewPlayer,_) :- nextPlayvsAI(Board, NewPlayer).
 
-getAI1Move(_, Move) :- random_between(1,7, Move).
-getAI2Move(Board, 1) :- \+ isIllegal(Board, 1).
-getAI2Move(Board, 2) :- \+ isIllegal(Board, 2).
-getAI2Move(Board, 3) :- \+ isIllegal(Board, 3).
-getAI2Move(Board, 4) :- \+ isIllegal(Board, 4).
-getAI2Move(Board, 5) :- \+ isIllegal(Board, 5).
-getAI2Move(Board, 6) :- \+ isIllegal(Board, 6).
-getAI2Move(Board, 7) :- \+ isIllegal(Board, 7).
 
-% play the game vs level 3 AI ----------------------------------------------------------------------------
-playAI3 :-  getBlankBoard(Board), nextPlayAI3(Board, 1).
-
-nextPlayAI3(Board, 1) :- nl,write('It is your turn.'),nl,nl,
-					  drawBoard(Board),
-					  read(Move),
-					  getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
-					  nextStateAI3(NewBoard, NewPlayer, OutDropXY).
-
-nextPlayAI3(Board, 2) :- nl,write('Computer is making move...'),nl,nl,
-					  drawBoard(Board),
-					  getAI3Move(Board, Move),
-					  nl,write('Computer dropped piece into column '),write(Move),nl,nl,
-					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
-					  nextStateAI3(NewBoard, NewPlayer, OutDropXY).
-
-nextStateAI3(Board, 2, DropXY) :- win(Board, 1, DropXY),nl, write('You win!'),nl, endmessage.
-nextStateAI3(Board, 1, DropXY) :- win(Board, 2, DropXY),nl, write('The computer wins!'),nl, endmessage.
-nextStateAI3(Board,_,_) :- isFull(Board),nl, write('It\'s a tie!'),nl, endmessage.
-nextStateAI3(Board, NewPlayer,_) :- nextPlayAI3(Board, NewPlayer).
-
-getAI3Move(Board, 1) :- \+ isIllegal(Board, 1), wouldWin(Board, 1, 2).
-getAI3Move(Board, 2) :- \+ isIllegal(Board, 2), wouldWin(Board, 2, 2).
-getAI3Move(Board, 3) :- \+ isIllegal(Board, 3), wouldWin(Board, 3, 2).
-getAI3Move(Board, 4) :- \+ isIllegal(Board, 4), wouldWin(Board, 4, 2).
-getAI3Move(Board, 5) :- \+ isIllegal(Board, 5), wouldWin(Board, 5, 2).
-getAI3Move(Board, 6) :- \+ isIllegal(Board, 6), wouldWin(Board, 6, 2).
-getAI3Move(Board, 7) :- \+ isIllegal(Board, 7), wouldWin(Board, 7, 2).
-
-getAI3Move(Board, 1) :- \+ isIllegal(Board, 1), wouldWin(Board, 1, 1).
-getAI3Move(Board, 2) :- \+ isIllegal(Board, 2), wouldWin(Board, 2, 1).
-getAI3Move(Board, 3) :- \+ isIllegal(Board, 3), wouldWin(Board, 3, 1).
-getAI3Move(Board, 4) :- \+ isIllegal(Board, 4), wouldWin(Board, 4, 1).
-getAI3Move(Board, 5) :- \+ isIllegal(Board, 5), wouldWin(Board, 5, 1).
-getAI3Move(Board, 6) :- \+ isIllegal(Board, 6), wouldWin(Board, 6, 1).
-getAI3Move(Board, 7) :- \+ isIllegal(Board, 7), wouldWin(Board, 7, 1).
-getAI3Move(_, Move) :- random_between(1,7, Move).
-
-% true if Player dropping piece at DropCol would win
-wouldWin(Board, DropCol, Player) :- dropToken(Board, Player, DropCol, NewBoard), getDropXY(Board, DropCol, OutDropXY), win(NewBoard, Player, OutDropXY).
-
-getNextState(InitBoard, InitPlayer, DropCol, InitBoard, InitPlayer,(1,1)) :- isIllegal(InitBoard, DropCol),nl, write('Illegal move.'),nl.
-getNextState(InitBoard, 1, DropCol, NewBoard, NewPlayer, OutDropXY) :- dropToken(InitBoard, 1, DropCol, NewBoard), getDropXY(InitBoard, DropCol, OutDropXY), NewPlayer = 2.
-getNextState(InitBoard, 2, DropCol, NewBoard, NewPlayer, OutDropXY) :- dropToken(InitBoard, 2, DropCol, NewBoard), getDropXY(InitBoard, DropCol, OutDropXY), NewPlayer = 1.
-
-win(Board, Player, Move) :- getRow(Board, Move, OutRow), fourInARow(OutRow, Player, 0).
-win(Board, Player, Move) :- getCol(Board, Move, OutCol), fourInARow(OutCol, Player, 0).
-win(Board, Player, Move) :- getDiagDown(Board, Move, OutDiag), fourInARow(OutDiag, Player, 0).
-win(Board, Player, Move) :- getDiagUp(Board, Move, OutDiag), fourInARow(OutDiag, Player, 0).
-
-%check if moves are illegal
-isIllegal(_, DropCol) :- DropCol > 7.
-isIllegal(_, DropCol) :- DropCol < 1.
-isIllegal(Board, DropCol) :- getElem(Board, DropCol, 1, 1, 1, OutElem), dif(OutElem, 0).
-
-% take a board, a player, and a column and return the board with the player's token dropped at the column
-
-dropToken(Board, Player, DropCol, OutBoard) :- getDropXY(Board, DropCol, DropXY), setElem(Board, Player, DropXY, OutBoard).
-%testDropToken(Player, Column) :- getBlankBoard(Board), dropToken(Board, Player, Column, OutBoard), drawBoard(OutBoard).
-
-% take a board, a coordinate, and a value and set the value at the coordinate in the board and return the new board
-
-setElem(Board, ToSet, (SetX, SetY), NewBoard) :- setElemHelper(Board, ToSet, (SetX, SetY), NewBoard, 1, 1).
-
-setElemHelper([[_|R]|C], ToSet, (SetX, SetY), [[ToSet|R]|C], SetX, SetY).
-%walk down the columns
-setElemHelper([H|T], ToSet, (SetX, SetY), [H|T1], _,CurrY) :- CurrY < SetY, is(NextY, CurrY + 1), setElemHelper(T, ToSet, (SetX, SetY), T1, 1,NextY).
-%walk down the rows
-setElemHelper([[H|R]|C], ToSet, (SetX, SetY), [[H|R1]|C1], CurrX, SetY) :- CurrX < SetX, is(NextX, CurrX + 1), setElemHelper([R|C], ToSet, (SetX, SetY), [R1|C1], NextX, SetY).
-
-%testSetElem(SetX, SetY, ToSet, OutBoard) :- getBlankBoard(Board), setElem(Board, ToSet, (SetX, SetY), OutBoard), drawBoard(OutBoard).
-
-% take a board and a column and return the board coordinates of where it will drop
-
-getDropXY(Board, DropCol, (DropCol, 6)) :- getElem(Board, DropCol, 6, 1, 1, OutElem), is(OutElem,0).
-getDropXY(Board, DropCol, (DropCol, 5)) :- getElem(Board, DropCol, 5, 1, 1, OutElem), getElem(Board, DropCol, 6, 1, 1, OutElem1), is(OutElem,0), dif(OutElem1, 0).
-getDropXY(Board, DropCol, (DropCol, 4)) :- getElem(Board, DropCol, 4, 1, 1, OutElem), getElem(Board, DropCol, 5, 1, 1, OutElem1), is(OutElem,0), dif(OutElem1, 0).
-getDropXY(Board, DropCol, (DropCol, 3)) :- getElem(Board, DropCol, 3, 1, 1, OutElem), getElem(Board, DropCol, 4, 1, 1, OutElem1), is(OutElem,0), dif(OutElem1, 0).
-getDropXY(Board, DropCol, (DropCol, 2)) :- getElem(Board, DropCol, 2, 1, 1, OutElem), getElem(Board, DropCol, 3, 1, 1, OutElem1), is(OutElem,0), dif(OutElem1, 0).
-getDropXY(Board, DropCol, (DropCol, 1)) :- getElem(Board, DropCol, 1, 1, 1, OutElem), getElem(Board, DropCol, 2, 1, 1, OutElem1), is(OutElem,0), dif(OutElem1, 0).
-
-%testGetDropXY(DropCol, (OutX, OutY)) :- getBlankBoard(Board), getDropXY(Board, DropCol, (OutX, OutY)).
-
-% Detect if a list has 4 in a row of type Player
-
-fourInARow(_,_,4).
-fourInARow([H|T], H, Count) :- dif(Count, 4), is(NewCount, Count + 1), fourInARow(T, H, NewCount).
-fourInARow([H|T], Player, Count) :- dif(Count, 4), dif(H, Player), fourInARow(T, Player, 0).
-
-% get the row from position at Move from Board
-getRow([H|_], (_,1), H).
-getRow([_|T], (_, MoveY), OutRow) :- MoveY > 1, is(NextMoveY, MoveY - 1), getRow(T, (0,NextMoveY), OutRow).
-
-% get the col from position at Move from Board
-getCol(Board, (X,_), OutCol) :- getElem(Board, X, 1, 1, 1, Out1),
-								getElem(Board, X, 2, 1, 1, Out2),
-								getElem(Board, X, 3, 1, 1, Out3),
-								getElem(Board, X, 4, 1, 1, Out4),
-								getElem(Board, X, 5, 1, 1, Out5),
-								getElem(Board, X, 6, 1, 1, Out6),
-								OutCol = [Out1, Out2, Out3, Out4, Out5, Out6].
-
-% get the DiagDown from position at Move from Board
-getDiagDown(Board, (X, Y), Out) :- getUpLeftStartingPos((X,Y),(StartX,StartY)), getDiagDownHelper(Board, (StartX,StartY), Out).
-
-getUpLeftStartingPos((X,Y),(StartX,StartY)) :- X < Y, is(StartX, 1), is(StartY, Y - X + 1).
-getUpLeftStartingPos((X,Y),(StartX,StartY)) :- Y < X, is(StartX, X - Y + 1), is(StartY, 1).
-getUpLeftStartingPos((A, A), (StartX, StartY)) :- StartX = 1, StartY = 1.
-
-getDiagDownHelper(_, (8,_), []).
-getDiagDownHelper(_, (_,7), []).
-getDiagDownHelper(Board, (CurrX, CurrY), [H|T]) :-  CurrX < 8, CurrY < 7,
-													is(NextX, CurrX + 1), is(NextY, CurrY + 1),
-													getElem(Board, CurrX, CurrY, 1, 1, H),
-												    getDiagDownHelper(Board, (NextX, NextY), T).
-
-% get the DiagUp from position at Move from Board
-getDiagUp(Board, (X, Y), Out) :- getDownLeftStartingPos((X,Y),(StartX,StartY)), getDiagUpHelper(Board, (StartX,StartY), Out).
-
-getDownLeftStartingPos((X,Y),(StartX,StartY)) :- is(X1,-X + 7), Y > X1, is(StartX, X-6+Y), is(StartY, 6).
-getDownLeftStartingPos((X,Y),(StartX,StartY)) :- is(X1,-X + 7), Y < X1, is(StartX, 1), is(StartY, Y + X - 1).
-getDownLeftStartingPos((X,Y),(StartX,StartY)) :- is(X1,-X + 7), is(Y, X1), StartX = 1, StartY = 6.
-
+% pre existing code changed ------------
 getDiagUpHelper(_, (8,_), []).
 getDiagUpHelper(_, (_,0), []).
 getDiagUpHelper(Board, (CurrX, CurrY), [H|T]) :-  CurrX < 8, CurrY > 0,
@@ -245,52 +127,7 @@ getDiagUpHelper(Board, (CurrX, CurrY), [H|T]) :-  CurrX < 8, CurrY > 0,
 													getElem(Board, CurrX, CurrY, 1, 1, H),
 												    getDiagUpHelper(Board, (NextX, NextY), T).
 
-%testGetRow(Out) :- getBlankBoard(Board), getRow(Board, (2,3), Out).
-%testGetCol(Out) :- getBlankBoard(Board), getCol(Board, (5,3), Out).
-%testGetDiagDown(Out) :- getBlankBoard(Board), getDiagDown(Board, (7,1), Out).
-%testGetDiagUp((InX, InY), Out) :- getBlankBoard(Board), getDiagUp(Board, (InX,InY), Out).
-%testGetStart((InX, InY), (StartX, StartY)) :- getDownLeftStartingPos((InX, InY), (StartX, StartY)).
 
-% get element of Board at X and Y
-% Board is a list of Rows
-%getElem(Board, X, Y, CurrX, CurrY, Out).
-
-%found the element
-getElem([[H|_]|_], X, Y, X, Y, H).
-
-%walk down the rows if not on the right one
-getElem([[_|_]|R], X, Y,_, CurrY, Out) :- dif(CurrY, Y), is(NextY, CurrY + 1), getElem(R, X, Y, 1, NextY, Out).
-
-%walk down the columns to find the right one
-getElem([[_|C]|R], X, Y, CurrX, Y, Out) :- dif(CurrX, X), is(NextX, CurrX + 1), getElem([C|R], X, Y, NextX, Y, Out).
-
-%detect if board if full
-isFull(Board):- isIllegal(Board, 1), isIllegal(Board, 2), isIllegal(Board, 3), isIllegal(Board, 4), isIllegal(Board, 5), isIllegal(Board, 6), isIllegal(Board, 7).
-
-getBlankBoard(Board) :- Board =    [[0,0,0,0,0,0,0],
-									[0,0,0,0,0,0,0],
-									[0,0,0,0,0,0,0],
-									[0,0,0,0,0,0,0],
-									[0,0,0,0,0,0,0],
-									[0,0,0,0,0,0,0]].
-
-
-drawBoard1([]).
-drawBoard1([H|T]) :- drawBoardRow(H),nl,drawBoard1(T).
-drawBoardRow([]).
-drawBoardRow([2|T]) :- ansi_format([bold,fg(red)], 'O ~w', [' ']), drawBoardRow(T).
-drawBoardRow([1|T]) :- ansi_format([bold,fg(yellow)], 'O ~w', [' ']), drawBoardRow(T).
-drawBoardRow([0|T]) :- ansi_format([bold,fg(black)], 'O ~w', [' ']), drawBoardRow(T).
-drawBoard(Board) :- ansi_format([bold,fg(black)], '1  2  3  4  5  6  7 ~w', [' ']),nl,nl, drawBoard1(Board).
-
-drawBlankBoard :- getBlankBoard(Board), drawBoard(Board).
-endmessage :- write('Enter \'play.\' to play a 2 player game or \'playAI[1-3].\' to play against the computer.').
-
-%testGetElem(Out) :- getBlankBoard(Board), getElem(Board, 2, 4, 1, 1, Out).
-
-% ----------------------------------------------------------------------------
-% Code par H4114
-%
 inversionPlayer(1,2).
 inversionPlayer(2,1).
 
@@ -388,80 +225,24 @@ countSubLineScore([F|_],_,_,-99,Player,_):- F\=Player, F\=0.
 fixScore(In,0):-In<0.
 fixScore(_,1).
 
-% end of set-4 heuristic
+getNextMovesScore(_,_,_,_,8,[]).
 
+getNextMovesScore(Node,Depth1,true,Player,Ind, [V|L]):- \+ isIllegal(Node,Ind), Ind1 is Ind + 1, wouldWin(Node,Ind,Player),V is 99999,
+	getNextMovesScore(Node,Depth1,true,Player,Ind1, L),!.
 
-
-% isDepthLimit(D, Node, true) :-
-%	D is 0.
-% isDepthLimit(D, Node, true) :-
-
-% isDepthLimit(D, Node, false) :-
-
-
-% minMax(Node, Depth, Max, Player, Value, 7) :-
-%	heuristic2(Node,7,Player,V1),
-%	getMaxMove([V1,V2,V3,V4,V5,V6,V7],Value),!.
-
-% minMax(Node, Depth, Max, Player, Value, It) :-
-%	heuristic2(Node, It, Player, V1),
-%	getMaxMove([V1,V2,V3,V4,V5,V6,V7],Value),!.
-%	It1 is It + 1,
-%	minMax(Node, Depth, Max, Player, Value, It1).
-
-getNextMovesScore1(_,_,_,_,8,[]).
-
-getNextMovesScore1(Node,Depth1,true,Player,Ind, [V|L]):- \+ isIllegal(Node,Ind), Ind1 is Ind + 1, wouldWin(Node,Ind,Player),V is 99999,
-	getNextMovesScore1(Node,Depth1,true,Player,Ind1, L),!.
-
-getNextMovesScore1(Node,Depth1,true,Player,Ind, [V|L]) :-
-	\+ isIllegal(Node,Ind),Ind1 is Ind + 1,getNextMovesScore1(Node,Depth1,true,Player,Ind1, L),
+getNextMovesScore(Node,Depth1,true,Player,Ind, [V|L]) :-
+	\+ isIllegal(Node,Ind),Ind1 is Ind + 1,getNextMovesScore(Node,Depth1,true,Player,Ind1, L),
 	getNextState(Node,Player,Ind,NewNode1,NewPlayer1,_),minMax1(NewNode1,Depth1,false,NewPlayer1,_,V),!.
-getNextMovesScore1(Node,Depth1,true,Player,Ind, [V|L]) :-Ind1 is Ind + 1,getNextMovesScore1(Node,Depth1,true,Player,Ind1, L),V is -99999,!.
+getNextMovesScore(Node,Depth1,true,Player,Ind, [V|L]) :-Ind1 is Ind + 1,getNextMovesScore(Node,Depth1,true,Player,Ind1, L),V is -99999,!.
 
-getNextMovesScore1(Node,Depth1,false,Player,Ind, [V|L]):- \+ isIllegal(Node,Ind), Ind1 is Ind + 1, wouldWin(Node,Ind,Player),V is -99999,
-	getNextMovesScore1(Node,Depth1,false,Player,Ind1, L),!.
+getNextMovesScore(Node,Depth1,false,Player,Ind, [V|L]):- \+ isIllegal(Node,Ind), Ind1 is Ind + 1, wouldWin(Node,Ind,Player),V is -99999,
+	getNextMovesScore(Node,Depth1,false,Player,Ind1, L),!.
 
-getNextMovesScore1(Node,Depth1,false,Player,Ind, [V|L]) :-
-	\+ isIllegal(Node,Ind),Ind1 is Ind + 1,getNextMovesScore1(Node,Depth1,false,Player,Ind1, L),
+getNextMovesScore(Node,Depth1,false,Player,Ind, [V|L]) :-
+	\+ isIllegal(Node,Ind),Ind1 is Ind + 1,getNextMovesScore(Node,Depth1,false,Player,Ind1, L),
 	getNextState(Node,Player,Ind,NewNode1,NewPlayer1,_),minMax1(NewNode1,Depth1,true,NewPlayer1,_,V),!.
-getNextMovesScore1(Node,Depth1,false,Player,Ind, [V|L]) :- Ind1 is Ind + 1,getNextMovesScore1(Node,Depth1,false,Player,Ind1, L),V is 99999,!.
+getNextMovesScore(Node,Depth1,false,Player,Ind, [V|L]) :- Ind1 is Ind + 1,getNextMovesScore(Node,Depth1,false,Player,Ind1, L),V is 99999,!.
 
-getNextMovesScore2(_,_,_,_,8,[]).
-
-getNextMovesScore2(Node,Depth1,true,Player,Ind, [V|L]):- \+ isIllegal(Node,Ind), Ind1 is Ind + 1, wouldWin(Node,Ind,Player),V is 99999,
-	getNextMovesScore2(Node,Depth1,true,Player,Ind1, L),!.
-
-getNextMovesScore2(Node,Depth1,true,Player,Ind, [V|L]) :-
-	\+ isIllegal(Node,Ind),Ind1 is Ind + 1,getNextMovesScore2(Node,Depth1,true,Player,Ind1, L),
-	getNextState(Node,Player,Ind,NewNode1,NewPlayer1,_),minMax2(NewNode1,Depth1,false,NewPlayer1,_,V),!.
-getNextMovesScore2(Node,Depth1,true,Player,Ind, [V|L]) :-Ind1 is Ind + 1,getNextMovesScore2(Node,Depth1,true,Player,Ind1, L),V is -99999,!.
-
-getNextMovesScore2(Node,Depth1,false,Player,Ind, [V|L]):- \+ isIllegal(Node,Ind), Ind1 is Ind + 1, wouldWin(Node,Ind,Player),V is -99999,
-	getNextMovesScore2(Node,Depth1,false,Player,Ind1, L),!.
-
-getNextMovesScore2(Node,Depth1,false,Player,Ind, [V|L]) :-
-	\+ isIllegal(Node,Ind),Ind1 is Ind + 1,getNextMovesScore2(Node,Depth1,false,Player,Ind1, L),
-	getNextState(Node,Player,Ind,NewNode1,NewPlayer1,_),minMax2(NewNode1,Depth1,true,NewPlayer1,_,V),!.
-getNextMovesScore2(Node,Depth1,false,Player,Ind, [V|L]) :- Ind1 is Ind + 1,getNextMovesScore2(Node,Depth1,false,Player,Ind1, L),V is 99999,!.
-
-getNextMovesScore3(_,_,_,_,8,[]).
-
-getNextMovesScore3(Node,Depth1,true,Player,Ind, [V|L]):- \+ isIllegal(Node,Ind), Ind1 is Ind + 1, wouldWin(Node,Ind,Player),V is 99999,
-	getNextMovesScore3(Node,Depth1,true,Player,Ind1, L),!.
-
-getNextMovesScore3(Node,Depth1,true,Player,Ind, [V|L]) :-
-	\+ isIllegal(Node,Ind),Ind1 is Ind + 1,getNextMovesScore3(Node,Depth1,true,Player,Ind1, L),
-	getNextState(Node,Player,Ind,NewNode1,NewPlayer1,_),minMax3(NewNode1,Depth1,false,NewPlayer1,_,V),!.
-getNextMovesScore3(Node,Depth1,true,Player,Ind, [V|L]) :-Ind1 is Ind + 1,getNextMovesScore3(Node,Depth1,true,Player,Ind1, L),V is -99999,!.
-
-getNextMovesScore3(Node,Depth1,false,Player,Ind, [V|L]):- \+ isIllegal(Node,Ind), Ind1 is Ind + 1, wouldWin(Node,Ind,Player),V is -99999,
-	getNextMovesScore3(Node,Depth1,false,Player,Ind1, L),!.
-
-getNextMovesScore3(Node,Depth1,false,Player,Ind, [V|L]) :-
-	\+ isIllegal(Node,Ind),Ind1 is Ind + 1,getNextMovesScore3(Node,Depth1,false,Player,Ind1, L),
-	getNextState(Node,Player,Ind,NewNode1,NewPlayer1,_),minMax3(NewNode1,Depth1,true,NewPlayer1,_,V),!.
-getNextMovesScore3(Node,Depth1,false,Player,Ind, [V|L]) :- Ind1 is Ind + 1,getNextMovesScore3(Node,Depth1,false,Player,Ind1, L),V is 99999,!.
 
 minMax2(Node,1,true,Player,Col,Value):-
     heuristic2(Node,1,Player,true,V1),heuristic2(Node,2,Player,true,V2),heuristic2(Node,3,Player,true,V3),heuristic2(Node,4,Player,true,V4),
@@ -473,9 +254,9 @@ minMax2(Node,1,false,Player, Col, Value):-
     heuristic2(Node,5,Player,false,V5),heuristic2(Node,6,Player,false,V6),heuristic2(Node,7,Player,false,V7),
     getMinMove([V1,V2,V3,V4,V5,V6,V7],Col,Value),!.
 
-minMax2(Node,Depth,true,Player,Col,Value):- Depth1 is Depth - 1,getNextMovesScore2(Node,Depth1,true,Player,1,L),getMaxMove(L,Col,Value).
+minMax2(Node,Depth,true,Player,Col,Value):- Depth1 is Depth - 1,getNextMovesScore(Node,Depth1,true,Player,1,L),getMaxMove(L,Col,Value).
 
-minMax2(Node,Depth,false,Player,Col,Value):- Depth1 is Depth - 1,getNextMovesScore2(Node,Depth1,false,Player,1,L),getMinMove(L,Col,Value).
+minMax2(Node,Depth,false,Player,Col,Value):- Depth1 is Depth - 1,getNextMovesScore(Node,Depth1,false,Player,1,L),getMinMove(L,Col,Value).
 
 minMax1(Node,1,true,Player,Col,Value):-
     heuristic1(Node,1,Player,true,V1),heuristic1(Node,2,Player,true,V2),heuristic1(Node,3,Player,true,V3),heuristic1(Node,4,Player,true,V4),
@@ -487,9 +268,9 @@ minMax1(Node,1,false,Player, Col, Value):-
     heuristic1(Node,5,Player,false,V5),heuristic1(Node,6,Player,false,V6),heuristic1(Node,7,Player,false,V7),
     getMinMove([V1,V2,V3,V4,V5,V6,V7],Col,Value),!.
 
-minMax1(Node,Depth,true,Player,Col,Value):- Depth1 is Depth - 1,getNextMovesScore1(Node,Depth1,true,Player,1,L),getMaxMove(L,Col,Value).
+minMax1(Node,Depth,true,Player,Col,Value):- Depth1 is Depth - 1,getNextMovesScore(Node,Depth1,true,Player,1,L),getMaxMove(L,Col,Value).
 
-minMax1(Node,Depth,false,Player,Col,Value):- Depth1 is Depth - 1,getNextMovesScore1(Node,Depth1,false,Player,1,L),getMinMove(L,Col,Value).
+minMax1(Node,Depth,false,Player,Col,Value):- Depth1 is Depth - 1,getNextMovesScore(Node,Depth1,false,Player,1,L),getMinMove(L,Col,Value).
 
 minMax3(Node,1,true,Player,Col,Value):-
     heuristic3(Node,1,Player,true,V1),heuristic3(Node,2,Player,true,V2),heuristic3(Node,3,Player,true,V3),heuristic3(Node,4,Player,true,V4),
@@ -501,9 +282,9 @@ minMax3(Node,1,false,Player, Col, Value):-
     heuristic3(Node,5,Player,false,V5),heuristic3(Node,6,Player,false,V6),heuristic3(Node,7,Player,false,V7),
     getMinMove([V1,V2,V3,V4,V5,V6,V7],Col,Value),!.
 
-minMax3(Node,Depth,true,Player,Col,Value):- Depth1 is Depth - 1,getNextMovesScore3(Node,Depth1,true,Player,1,L),getMaxMove(L,Col,Value).
+minMax3(Node,Depth,true,Player,Col,Value):- Depth1 is Depth - 1,getNextMovesScore(Node,Depth1,true,Player,1,L),getMaxMove(L,Col,Value).
 
-minMax3(Node,Depth,false,Player,Col,Value):- Depth1 is Depth - 1,getNextMovesScore3(Node,Depth1,false,Player,1,L),getMinMove(L,Col,Value).
+minMax3(Node,Depth,false,Player,Col,Value):- Depth1 is Depth - 1,getNextMovesScore(Node,Depth1,false,Player,1,L),getMinMove(L,Col,Value).
 
 % X is the postion of the highest element in the list L.
 getMaxMove(L, Col, Y) :- max_list(L, Y), findall(N,nth1(N,L,Y),C),random_member(Col,C),!.
@@ -511,6 +292,154 @@ getMaxMove(L, Col, Y) :- max_list(L, Y), findall(N,nth1(N,L,Y),C),random_member(
 % X is the postion of the lowest element in the list L.
 getMinMove(L, Col, Y) :- min_list(L, Y), findall(N,nth1(N,L,Y),C),random_member(Col,C),!.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% pre existing code -------------------------------
+%
+getAI1Move(_, Move) :- random_between(1,7, Move).
+getAI2Move(Board, 1) :- \+ isIllegal(Board, 1).
+getAI2Move(Board, 2) :- \+ isIllegal(Board, 2).
+getAI2Move(Board, 3) :- \+ isIllegal(Board, 3).
+getAI2Move(Board, 4) :- \+ isIllegal(Board, 4).
+getAI2Move(Board, 5) :- \+ isIllegal(Board, 5).
+getAI2Move(Board, 6) :- \+ isIllegal(Board, 6).
+getAI2Move(Board, 7) :- \+ isIllegal(Board, 7).
+
+getAI3Move(Board, 1) :- \+ isIllegal(Board, 1), wouldWin(Board, 1, 2).
+getAI3Move(Board, 2) :- \+ isIllegal(Board, 2), wouldWin(Board, 2, 2).
+getAI3Move(Board, 3) :- \+ isIllegal(Board, 3), wouldWin(Board, 3, 2).
+getAI3Move(Board, 4) :- \+ isIllegal(Board, 4), wouldWin(Board, 4, 2).
+getAI3Move(Board, 5) :- \+ isIllegal(Board, 5), wouldWin(Board, 5, 2).
+getAI3Move(Board, 6) :- \+ isIllegal(Board, 6), wouldWin(Board, 6, 2).
+getAI3Move(Board, 7) :- \+ isIllegal(Board, 7), wouldWin(Board, 7, 2).
+
+getAI3Move(Board, 1) :- \+ isIllegal(Board, 1), wouldWin(Board, 1, 1).
+getAI3Move(Board, 2) :- \+ isIllegal(Board, 2), wouldWin(Board, 2, 1).
+getAI3Move(Board, 3) :- \+ isIllegal(Board, 3), wouldWin(Board, 3, 1).
+getAI3Move(Board, 4) :- \+ isIllegal(Board, 4), wouldWin(Board, 4, 1).
+getAI3Move(Board, 5) :- \+ isIllegal(Board, 5), wouldWin(Board, 5, 1).
+getAI3Move(Board, 6) :- \+ isIllegal(Board, 6), wouldWin(Board, 6, 1).
+getAI3Move(Board, 7) :- \+ isIllegal(Board, 7), wouldWin(Board, 7, 1).
+getAI3Move(_, Move) :- random_between(1,7, Move).
+
+
+
+% true if Player dropping piece at DropCol would win
+wouldWin(Board, DropCol, Player) :- dropToken(Board, Player, DropCol, NewBoard), getDropXY(Board, DropCol, OutDropXY), win(NewBoard, Player, OutDropXY).
+
+getNextState(InitBoard, InitPlayer, DropCol, InitBoard, InitPlayer,(1,1)) :- isIllegal(InitBoard, DropCol),nl, write('Illegal move.'),nl.
+getNextState(InitBoard, 1, DropCol, NewBoard, NewPlayer, OutDropXY) :- dropToken(InitBoard, 1, DropCol, NewBoard), getDropXY(InitBoard, DropCol, OutDropXY), NewPlayer = 2.
+getNextState(InitBoard, 2, DropCol, NewBoard, NewPlayer, OutDropXY) :- dropToken(InitBoard, 2, DropCol, NewBoard), getDropXY(InitBoard, DropCol, OutDropXY), NewPlayer = 1.
+
+win(Board, Player, Move) :- getRow(Board, Move, OutRow), fourInARow(OutRow, Player, 0).
+win(Board, Player, Move) :- getCol(Board, Move, OutCol), fourInARow(OutCol, Player, 0).
+win(Board, Player, Move) :- getDiagDown(Board, Move, OutDiag), fourInARow(OutDiag, Player, 0).
+win(Board, Player, Move) :- getDiagUp(Board, Move, OutDiag), fourInARow(OutDiag, Player, 0).
+
+%check if moves are illegal
+isIllegal(_, DropCol) :- DropCol > 7.
+isIllegal(_, DropCol) :- DropCol < 1.
+isIllegal(Board, DropCol) :- getElem(Board, DropCol, 1, 1, 1, OutElem), dif(OutElem, 0).
+
+% take a board, a player, and a column and return the board with the player's token dropped at the column
+
+dropToken(Board, Player, DropCol, OutBoard) :- getDropXY(Board, DropCol, DropXY), setElem(Board, Player, DropXY, OutBoard).
+%testDropToken(Player, Column) :- getBlankBoard(Board), dropToken(Board, Player, Column, OutBoard), drawBoard(OutBoard).
+
+% take a board, a coordinate, and a value and set the value at the coordinate in the board and return the new board
+
+setElem(Board, ToSet, (SetX, SetY), NewBoard) :- setElemHelper(Board, ToSet, (SetX, SetY), NewBoard, 1, 1).
+
+setElemHelper([[_|R]|C], ToSet, (SetX, SetY), [[ToSet|R]|C], SetX, SetY).
+%walk down the columns
+setElemHelper([H|T], ToSet, (SetX, SetY), [H|T1], _,CurrY) :- CurrY < SetY, is(NextY, CurrY + 1), setElemHelper(T, ToSet, (SetX, SetY), T1, 1,NextY).
+%walk down the rows
+setElemHelper([[H|R]|C], ToSet, (SetX, SetY), [[H|R1]|C1], CurrX, SetY) :- CurrX < SetX, is(NextX, CurrX + 1), setElemHelper([R|C], ToSet, (SetX, SetY), [R1|C1], NextX, SetY).
+
+%testSetElem(SetX, SetY, ToSet, OutBoard) :- getBlankBoard(Board), setElem(Board, ToSet, (SetX, SetY), OutBoard), drawBoard(OutBoard).
+
+% take a board and a column and return the board coordinates of where it will drop
+
+getDropXY(Board, DropCol, (DropCol, 6)) :- getElem(Board, DropCol, 6, 1, 1, OutElem), is(OutElem,0).
+getDropXY(Board, DropCol, (DropCol, 5)) :- getElem(Board, DropCol, 5, 1, 1, OutElem), getElem(Board, DropCol, 6, 1, 1, OutElem1), is(OutElem,0), dif(OutElem1, 0).
+getDropXY(Board, DropCol, (DropCol, 4)) :- getElem(Board, DropCol, 4, 1, 1, OutElem), getElem(Board, DropCol, 5, 1, 1, OutElem1), is(OutElem,0), dif(OutElem1, 0).
+getDropXY(Board, DropCol, (DropCol, 3)) :- getElem(Board, DropCol, 3, 1, 1, OutElem), getElem(Board, DropCol, 4, 1, 1, OutElem1), is(OutElem,0), dif(OutElem1, 0).
+getDropXY(Board, DropCol, (DropCol, 2)) :- getElem(Board, DropCol, 2, 1, 1, OutElem), getElem(Board, DropCol, 3, 1, 1, OutElem1), is(OutElem,0), dif(OutElem1, 0).
+getDropXY(Board, DropCol, (DropCol, 1)) :- getElem(Board, DropCol, 1, 1, 1, OutElem), getElem(Board, DropCol, 2, 1, 1, OutElem1), is(OutElem,0), dif(OutElem1, 0).
+
+%testGetDropXY(DropCol, (OutX, OutY)) :- getBlankBoard(Board), getDropXY(Board, DropCol, (OutX, OutY)).
+
+% Detect if a list has 4 in a row of type Player
+
+fourInARow(_,_,4).
+fourInARow([H|T], H, Count) :- dif(Count, 4), is(NewCount, Count + 1), fourInARow(T, H, NewCount).
+fourInARow([H|T], Player, Count) :- dif(Count, 4), dif(H, Player), fourInARow(T, Player, 0).
+
+% get the row from position at Move from Board
+getRow([H|_], (_,1), H).
+getRow([_|T], (_, MoveY), OutRow) :- MoveY > 1, is(NextMoveY, MoveY - 1), getRow(T, (0,NextMoveY), OutRow).
+
+% get the col from position at Move from Board
+getCol(Board, (X,_), OutCol) :- getElem(Board, X, 1, 1, 1, Out1),
+								getElem(Board, X, 2, 1, 1, Out2),
+								getElem(Board, X, 3, 1, 1, Out3),
+								getElem(Board, X, 4, 1, 1, Out4),
+								getElem(Board, X, 5, 1, 1, Out5),
+								getElem(Board, X, 6, 1, 1, Out6),
+								OutCol = [Out1, Out2, Out3, Out4, Out5, Out6].
+
+% get the DiagDown from position at Move from Board
+getDiagDown(Board, (X, Y), Out) :- getUpLeftStartingPos((X,Y),(StartX,StartY)), getDiagDownHelper(Board, (StartX,StartY), Out).
+
+getUpLeftStartingPos((X,Y),(StartX,StartY)) :- X < Y, is(StartX, 1), is(StartY, Y - X + 1).
+getUpLeftStartingPos((X,Y),(StartX,StartY)) :- Y < X, is(StartX, X - Y + 1), is(StartY, 1).
+getUpLeftStartingPos((A, A), (StartX, StartY)) :- StartX = 1, StartY = 1.
+
+getDiagDownHelper(_, (8,_), []).
+getDiagDownHelper(_, (_,7), []).
+getDiagDownHelper(Board, (CurrX, CurrY), [H|T]) :-  CurrX < 8, CurrY < 7,
+													is(NextX, CurrX + 1), is(NextY, CurrY + 1),
+													getElem(Board, CurrX, CurrY, 1, 1, H),
+												    getDiagDownHelper(Board, (NextX, NextY), T).
+
+% get the DiagUp from position at Move from Board
+getDiagUp(Board, (X, Y), Out) :- getDownLeftStartingPos((X,Y),(StartX,StartY)), getDiagUpHelper(Board, (StartX,StartY), Out).
+
+getDownLeftStartingPos((X,Y),(StartX,StartY)) :- is(X1,-X + 7), Y > X1, is(StartX, X-6+Y), is(StartY, 6).
+getDownLeftStartingPos((X,Y),(StartX,StartY)) :- is(X1,-X + 7), Y < X1, is(StartX, 1), is(StartY, Y + X - 1).
+getDownLeftStartingPos((X,Y),(StartX,StartY)) :- is(X1,-X + 7), is(Y, X1), StartX = 1, StartY = 6.
+
+
+
+%found the element
+getElem([[H|_]|_], X, Y, X, Y, H).
+
+%walk down the rows if not on the right one
+getElem([[_|_]|R], X, Y,_, CurrY, Out) :- dif(CurrY, Y), is(NextY, CurrY + 1), getElem(R, X, Y, 1, NextY, Out).
+
+%walk down the columns to find the right one
+getElem([[_|C]|R], X, Y, CurrX, Y, Out) :- dif(CurrX, X), is(NextX, CurrX + 1), getElem([C|R], X, Y, NextX, Y, Out).
+
+%detect if board if full
+isFull(Board):- isIllegal(Board, 1), isIllegal(Board, 2), isIllegal(Board, 3), isIllegal(Board, 4), isIllegal(Board, 5), isIllegal(Board, 6), isIllegal(Board, 7).
+
+getBlankBoard(Board) :- Board =    [[0,0,0,0,0,0,0],
+									[0,0,0,0,0,0,0],
+									[0,0,0,0,0,0,0],
+									[0,0,0,0,0,0,0],
+									[0,0,0,0,0,0,0],
+									[0,0,0,0,0,0,0]].
+
+
+drawBoard1([]).
+drawBoard1([H|T]) :- drawBoardRow(H),nl,drawBoard1(T).
+drawBoardRow([]).
+drawBoardRow([2|T]) :- ansi_format([bold,fg(red)], 'O ~w', [' ']), drawBoardRow(T).
+drawBoardRow([1|T]) :- ansi_format([bold,fg(yellow)], 'O ~w', [' ']), drawBoardRow(T).
+drawBoardRow([0|T]) :- ansi_format([bold,fg(black)], 'O ~w', [' ']), drawBoardRow(T).
+drawBoard(Board) :- ansi_format([bold,fg(black)], '1  2  3  4  5  6  7 ~w', [' ']),nl,nl, drawBoard1(Board).
+
+drawBlankBoard :- getBlankBoard(Board), drawBoard(Board).
+endmessage :- write('Enter \'play.\' to play a 2 player game or \'playAI[1-3].\' to play against the computer.').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% GUI
