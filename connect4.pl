@@ -48,14 +48,14 @@ incrfoo2 :-
 % make two AIs play together ----------------------
 playAIvsAI :- getBlankBoard(Board), nextPlayAIvsAI(Board, 1).
 
-nextPlayAIvsAI(Board, 1) :- getAIdynMove(Board, Move,1,3),
+nextPlayAIvsAI(Board, 1) :- getAIh2Move(Board, Move,1,3),
 					  %nl,write('Yellow dropped piece into column '),write(Move),nl,nl,
 					  getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
 					  %drawBoard(NewBoard),
 
 					  nextStateAI(NewBoard, NewPlayer, OutDropXY).
 
-nextPlayAIvsAI(Board, 2) :-getAI3Move(Board, Move),
+nextPlayAIvsAI(Board, 2) :-getAIh2Move(Board, Move,2,2),
 					  %nl,write('Red dropped piece into column '),write(Move),nl,nl
 
 					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
@@ -71,11 +71,11 @@ nextStateAI(Board, NewPlayer,_) :- nextPlayAIvsAI(Board, NewPlayer).
 
 
 %getAIDepth0Move(Board, Move) :- minMax(Board,1,false,2,Move,_).
-getAIlocMove(Board, Move,P,Depth) :- 1 is mod(Depth,2),minMax(Board,Depth,true,P,Move,_).
-getAIlocMove(Board, Move,P,Depth) :- 0 is mod(Depth,2),minMax(Board,Depth,false,P,Move,_).
+getAIh2Move(Board, Move,P,Depth) :- 1 is mod(Depth,2),minMax(Board,Depth,true,P,Move,_).
+getAIh2Move(Board, Move,P,Depth) :- 0 is mod(Depth,2),minMax(Board,Depth,false,P,Move,_).
 
-getAIdynMove(Board, Move,P,Depth) :- 1 is mod(Depth,2),minMax2(Board,Depth,true,P,Move,_).
-getAIdynMove(Board, Move,P,Depth) :- 0 is mod(Depth,2),minMax2(Board,Depth,false,P,Move,_).
+getAIh1Move(Board, Move,P,Depth) :- 1 is mod(Depth,2),minMax2(Board,Depth,true,P,Move,_).
+getAIh1Move(Board, Move,P,Depth) :- 0 is mod(Depth,2),minMax2(Board,Depth,false,P,Move,_).
 
 
 
@@ -91,7 +91,7 @@ nextPlayvsAI(Board, 1) :- nl,write('It is your turn.'),nl,nl,
 
 nextPlayvsAI(Board, 2) :- nl,write('Computer is making move...'),nl,nl,
 					  drawBoard(Board),
-					  getAIlocMove(Board, Move,2,2),
+					  getAIh1Move(Board, Move,2,2),
 					  nl,write('Computer dropped piece into column '),write(Move),nl,nl,
 					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
 					  nextStateAI2(NewBoard, NewPlayer, OutDropXY).
