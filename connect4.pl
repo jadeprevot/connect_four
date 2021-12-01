@@ -335,12 +335,6 @@ heuristic3(Board,Col,Player,50000):- \+ isIllegal(Board,Col),inversionPlayer(Pla
 heuristic3(Board,Col,Player,Score):- \+ isIllegal(Board,Col),calcScore2(Board,Col,Player,Score).
 heuristic3(_,_,_,-50003).
 				
-% get value of a matrix	
-cellVal([], _, []).
-cellVal([[R, C]| L], X, [Y|Z]) :-
-    nth0(R, X, Row),
-    nth0(C, Row, Y),
-    cellVal(L, X, Z).
 	
 % Return the Score when player plays in the col
 calcScore2(Board,Col,Player,Score):-getDropXY(Board,Col,(X,Y)),calcScore2(Board,X,Y,Player,Score).
