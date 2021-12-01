@@ -344,13 +344,13 @@ calcScore2(Board,X,Y,Player,Score):-getRow(Board,(X,Y),Row),countLineScore2(Row,
 		    posDiagUp(X,Y,I2),calcPosBug(X,Y,X2,Y2),getDiagUp(Board,(X2,Y2),DiagUp),countLineScore2(DiagUp,I2,Score4,Player),
 		    Score is Score1+Score2+Score3+Score4.
 
-%(On calcule le score autour de la position initiale, en mettant à 0 si un pion ennemi est sur notre ligne si non, 1)
+%(On calcule le score autour de la position initiale)
 countLineScore2(L,PosX,Score,Player):-length(L,Taille),countLineScore2(L,PosX,1,Score,Player,Taille).
 countLineScore2(_,PosX,CurrentX,0,_,_):- CurrentX is PosX+1.
 countLineScore2([F|R],PosX,CurrentX,Score,Player,Taille):- PosX-CurrentX<4, is(NextX, CurrentX+1), is(EndX, CurrentX+3), EndX<Taille+1, countSubLineScore([F|R],EndX,CurrentX,SubScore,Player,Taille) , fixScore(SubScore,FixSubScore), countLineScore2(R,PosX,NextX,NextScore,Player,Taille), Score is FixSubScore+NextScore.
 countLineScore2([_|R],PosX,CurrentX,Score,Player,Taille):-is(NextX, CurrentX+1),countLineScore2(R,PosX,NextX,Score,Player,Taille).
 	
-	
+%(On calcule le score de chaque set de 4, en mettant à 0 si un pion ennemi est sur notre set si non, 1)
 countSubLineScore(_,_,CurrentX,0,_,Taille):-CurrentX is Taille+1.
 countSubLineScore(_,EndX,CurrentX,0,_,_):- CurrentX is EndX+1.
 countSubLineScore([F|R],EndX,CurrentX,Score,Player,Taille):-(F==Player; F==0), is(NextX, CurrentX+1), countSubLineScore(R,EndX,NextX,NextScore,Player,Taille),Score is NextScore+1.
