@@ -55,7 +55,7 @@ incrfoo2 :-
 playAIvsAI :- getBlankBoard(Board), nextPlayAIvsAI(Board, 1,0).
 
 
-nextPlayAIvsAI(Board, 1,Ind) :- getAIh2Move(Board, Move,1,0),
+nextPlayAIvsAI(Board, 1,Ind) :- getAIh2Move(Board, Move,1,2),
 					  %nl,write('Yellow dropped piece into column '),write(Move),nl,nl,
 					  getNextState(Board, 1, Move, NewBoard, NewPlayer, OutDropXY),
 					  drawBoard(NewBoard),
@@ -63,7 +63,7 @@ nextPlayAIvsAI(Board, 1,Ind) :- getAIh2Move(Board, Move,1,0),
 					  nextStateAI(NewBoard, NewPlayer, OutDropXY, Ind1).
 
 
-nextPlayAIvsAI(Board, 2,Ind) :-getAIh1Move(Board, Move,2,0),
+nextPlayAIvsAI(Board, 2,Ind) :-getAIh1Move(Board, Move,2,1),
 					  %nl,write('Red dropped piece into column '),write(Move),nl,nl
 
 					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
@@ -108,7 +108,7 @@ nextPlayvsAI(Board, 1) :- nl,write('It is your turn.'),nl,nl,
 
 nextPlayvsAI(Board, 2) :- nl,write('Computer is making move...'),nl,nl,
 					  drawBoard(Board),
-					  getAIh1Move(Board, Move,2,2),
+					  getAIh2Move(Board, Move,2,3),
 					  nl,write('Computer dropped piece into column '),write(Move),nl,nl,
 					  getNextState(Board, 2, Move, NewBoard, NewPlayer, OutDropXY),
 					  nextStateAI2(NewBoard, NewPlayer, OutDropXY).
