@@ -225,6 +225,7 @@ countSubLineScore([F|_],_,_,-99,Player,_):- F\=Player, F\=0.
 fixScore(In,0):-In<0.
 fixScore(_,1).
 
+%getNextMovesScore, used with the MinMax to loop between each columns
 getNextMovesScore(_,_,_,_,8,[]).
 
 getNextMovesScore(Node,Depth1,true,Player,Ind, [V|L]):- \+ isIllegal(Node,Ind), Ind1 is Ind + 1, wouldWin(Node,Ind,Player),V is 99999,
@@ -243,7 +244,7 @@ getNextMovesScore(Node,Depth1,false,Player,Ind, [V|L]) :-
 	getNextState(Node,Player,Ind,NewNode1,NewPlayer1,_),minMax1(NewNode1,Depth1,true,NewPlayer1,_,V),!.
 getNextMovesScore(Node,Depth1,false,Player,Ind, [V|L]) :- Ind1 is Ind + 1,getNextMovesScore(Node,Depth1,false,Player,Ind1, L),V is 99999,!.
 
-
+%MinMax Methods used for each heuristic
 minMax2(Node,1,true,Player,Col,Value):-
     heuristic2(Node,1,Player,true,V1),heuristic2(Node,2,Player,true,V2),heuristic2(Node,3,Player,true,V3),heuristic2(Node,4,Player,true,V4),
     heuristic2(Node,5,Player,true,V5),heuristic2(Node,6,Player,true,V6),heuristic2(Node,7,Player,true,V7),
