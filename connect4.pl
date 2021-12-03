@@ -4,7 +4,7 @@
 % Enter 'playvsAI.' to play the game versus the computer.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Code par H4114
+%Code by H4114
 %
 
 
@@ -147,14 +147,14 @@ calcScore(Board,X,Y,Player,Score):-getRow(Board,(X,Y),Row),countLineScore(Row,X,
 				   posDiagUp(X,Y,I2),getDiagUp(Board,(X,Y),DiagUp),countLineScore(DiagUp,I2,Score4,Player),
 				   Score is Score1+Score2+Score3+Score4.
 
-%I est la position dans la diagonale du point de coordonn�es X Y
+%I is the position in the diagonal du point of coordinates X Y
 posDiagDown(X,Y,I):-I is min(X,Y).
 posDiagUp(X,Y,I):-I is min(7-Y,X).
 
 
-% Pour un ligne et une position, Score est le nombre d'element Player
-% dans les 3 positions precedentes et 3 positions suivantes
-%(On evalue une plage de 3 autour de la position initiale)
+% For a row and a position, Score is the number of Player elements
+% in the 3 previous positions and 3 following positions
+%(We evaluate a range of 3 around the initial position)
 countLineScore(L,PosX,Score,Player):-length(L,Taille),countLineScore(L,PosX,1,Score,Player,Taille).
 countLineScore(_,_,CurrentX,0,_,Taille):-CurrentX is Taille+1.
 countLineScore(_,PosX,CurrentX,0,_,_):- CurrentX is PosX+4.
@@ -175,9 +175,9 @@ heuristic2(_,_,_,false,50003).
 
 
 
-% Pour chaque position, si le jeton apartient a Player, on ajoute le
-% poids de la case au score
-% Si le jeton appartient a l'adversaire, on soustrait ce poids
+% For each position, if the token belongs to Player, we add
+% the weight of the box to the score
+% If the token belongs to the opponent, we subtract this weight
 boardScoreWeights([],_,_,0,_).
 boardScoreWeights([[]|T],_,Y,Score,Player):- NewY is Y+1, boardScoreWeights(T,1,NewY,Score,Player).
 boardScoreWeights([[Player|T]|R],X,Y,Score,Player):-NewX is X+1,boardScoreWeights([T|R],NewX,Y,NewScore,Player),
@@ -208,7 +208,7 @@ calcScore2(Board,X,Y,Player,Score):-getRow(Board,(X,Y),Row),countLineScore2(Row,
 		    posDiagUp(X,Y,I2),getDiagUp(Board,(X,Y),DiagUp),countLineScore2(DiagUp,I2,Score4,Player),
 		    Score is Score1+Score2+Score3+Score4.
 
-%(On calcule le score autour de la position initiale, en mettant à 0 si un pion ennemi est sur notre ligne si non, 1)
+%(We calculate the score around the initial position, putting 0 if an enemy pawn is on our line, otherwise 1)
 countLineScore2(L,PosX,Score,Player):-length(L,Taille),countLineScore2(L,PosX,1,Score,Player,Taille).
 countLineScore2(_,PosX,CurrentX,0,_,_):- CurrentX is PosX+1.
 countLineScore2([F|R],PosX,CurrentX,Score,Player,Taille):- PosX-CurrentX<4, is(NextX, CurrentX+1), is(EndX, CurrentX+3), EndX<Taille+1, countSubLineScore([F|R],EndX,CurrentX,SubScore,Player,Taille) , fixScore(SubScore,FixSubScore), countLineScore2(R,PosX,NextX,NextScore,Player,Taille), Score is FixSubScore+NextScore.
@@ -221,7 +221,7 @@ countSubLineScore([F|R],EndX,CurrentX,Score,Player,Taille):-(F==Player; F==0), i
 countSubLineScore([F|_],_,_,-99,Player,_):- F\=Player, F\=0.
 
 
-% If the score is negative, its 0, else, 1
+% If the score is negative, it's 0, else, 1
 fixScore(In,0):-In<0.
 fixScore(_,1).
 
@@ -287,14 +287,14 @@ minMax3(Node,Depth,true,Player,Col,Value):- Depth1 is Depth - 1,getNextMovesScor
 
 minMax3(Node,Depth,false,Player,Col,Value):- Depth1 is Depth - 1,getNextMovesScore(Node,Depth1,false,Player,1,L),getMinMove(L,Col,Value).
 
-% X is the postion of the highest element in the list L.
+% X is the position of the highest element in the list L.
 getMaxMove(L, Col, Y) :- max_list(L, Y), findall(N,nth1(N,L,Y),C),random_member(Col,C),!.
 
-% X is the postion of the lowest element in the list L.
+% X is the position of the lowest element in the list L.
 getMinMove(L, Col, Y) :- min_list(L, Y), findall(N,nth1(N,L,Y),C),random_member(Col,C),!.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% pre existing code -------------------------------
+% pre-existing code -------------------------------
 %
 getAI1Move(_, Move) :- random_between(1,7, Move).
 getAI2Move(Board, 1) :- \+ isIllegal(Board, 1).
